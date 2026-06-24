@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polytechnic Hub | Result & Calculators</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0a0a1a',
+                            primary: '#3b82f6', // Blue
+                            secondary: '#8b5cf6', // Purple
+                            accent: '#10b981', // Emerald
+                            warning: '#f59e0b' // Amber
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS for Premium 3D & Glassmorphism -->
+    <style>
+        body {
+            background-color: #0a0a1a;
+            color: #ffffff;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.1) 0px, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0px, transparent 40%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        /* View Management */
+        .view-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .view-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* ---------------- Premium 3D Cards ---------------- */
+        .perspective-container { perspective: 1500px; }
+        
+        .card-3d {
+            transform-style: preserve-3d;
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            transition: all 0.4s ease-out;
+            position: relative;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .card-3d::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.1), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1;
+        }
+
+        .card-3d:hover {
+            transform: translateY(-10px) rotateX(var(--rotate-x, 5deg)) rotateY(var(--rotate-y, -5deg));
+            box-shadow: 20px 25px 40px -10px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .card-3d:hover::after { opacity: 1; }
+
+        .card-content { transform: translateZ(40px); position: relative; z-index: 2; }
+        .card-icon { transform: translateZ(60px); transition: transform 0.4s; }
+        .card-3d:hover .card-icon { transform: translateZ(80px) scale(1.15); }
+
+        /* Floating Element */
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        
+        /* ---------------- Glass Inputs & Panels ---------------- */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s;
+        }
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+            outline: none;
+        }
+
+        /* ---------------- Results Ring Animation ---------------- */
+        .result-circle {
+            stroke-dasharray: 440;
+            stroke-dashoffset: 440;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-primary selection:text-white flex flex-col min-h-screen">
+
+    <!-- Header Navigation -->
+    <header class="fixed w-full top-0 z-40 bg-brand-dark/80 backdrop-blur-xl border-b border-white/10">
+        <div class="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-primary to-brand-secondary flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-graduation-cap text-white text-xl"></i>
+                </div>
+                <h1 class="text-xl font-heading font-bold tracking-wide text-white">POLYTECHNIC <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">HUB</span></h1>
+            </div>
+            <div class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm font-semibold text-white flex items-center gap-2">
+                <i class="fa-solid fa-calculator text-blue-400"></i> <span class="hidden sm:inline">Calculators</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow pt-28 pb-16 flex flex-col justify-center relative z-10">
+
+        <!-- ================= VIEW 1: MAIN DASHBOARD ================= -->
+        <section id="view-dashboard" class="view-section active container mx-auto px-4 sm:px-6">
+            <div class="text-center mb-16">
+                <div class="inline-block px-4 py-2 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 text-sm font-medium mb-6">
+                    Performance Tracking
+                </div>
+                <h2 class="text-4xl md:text-6xl font-heading font-extrabold mb-4 tracking-tight">
+                    Result & <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Calculators</span>
+                </h2>
+                <p class="text-gray-400 max-w-2xl mx-auto text-lg">Check your official results directly or accurately predict your performance using our premium SGPA and CGPA calculators.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto perspective-container">
+                
+                <!-- Card 1: Official Result -->
+                <a href="https://sbte.bihar.gov.in" target="_blank" class="card-3d p-8 flex flex-col items-center text-center group animate-float" style="box-shadow: inset 0 0 0 1px rgba(245,158,11,0.3)">
+                    <div class="card-icon w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 flex items-center justify-center border border-amber-500/20 shadow-lg mb-6">
+                        <i class="fa-solid fa-trophy text-4xl text-amber-400 drop-shadow-md"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="text-2xl font-bold text-white mb-2">Official Result</h3>
+                        <p class="text-sm text-gray-400 mb-4">View your semester results on the official SBTE Bihar portal.</p>
+                        <span class="inline-flex items-center gap-2 text-amber-400 font-semibold text-sm group-hover:text-amber-300">
+                            Open Portal <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Card 2: SGPA Calculator -->
+                <div onclick="switchView('view-sgpa')" class="card-3d p-8 flex flex-col items-center text-center group animate-float" style="animation-delay: 0.2s; box-shadow: inset 0 0 0 1px rgba(59,130,246,0.3)">
+                    <div class="card-icon w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/10 flex items-center justify-center border border-blue-500/20 shadow-lg mb-6">
+                        <i class="fa-solid fa-chart-simple text-4xl text-blue-400 drop-shadow-md"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="text-2xl font-bold text-white mb-2">SGPA Calculator</h3>
+                        <p class="text-sm text-gray-400 mb-4">Calculate your Semester Grade Point Average with subject credits.</p>
+                        <span class="inline-flex items-center gap-2 text-blue-400 font-semibold text-sm group-hover:text-blue-300">
+                            Calculate Now <i class="fa-solid fa-arrow-right"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Card 3: CGPA Calculator -->
+                <div onclick="switchView('view-cgpa')" class="card-3d p-8 flex flex-col items-center text-center group animate-float" style="animation-delay: 0.4s; box-shadow: inset 0 0 0 1px rgba(139,92,246,0.3)">
+                    <div class="card-icon w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/10 flex items-center justify-center border border-purple-500/20 shadow-lg mb-6">
+                        <i class="fa-solid fa-bullseye text-4xl text-purple-400 drop-shadow-md"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="text-2xl font-bold text-white mb-2">CGPA Calculator</h3>
+                        <p class="text-sm text-gray-400 mb-4">Calculate your Cumulative GPA using your completed semester SGPAs.</p>
+                        <span class="inline-flex items-center gap-2 text-purple-400 font-semibold text-sm group-hover:text-purple-300">
+                            Calculate Now <i class="fa-solid fa-arrow-right"></i>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ================= VIEW 2: SGPA CALCULATOR ================= -->
+        <section id="view-sgpa" class="view-section container mx-auto px-4 sm:px-6 max-w-4xl">
+            <button onclick="switchView('view-dashboard')" class="mb-8 flex items-center gap-2 text-gray-400 hover:text-white px-4 py-2 rounded-xl hover:bg-white/5 transition-all group">
+                <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i> Back to Dashboard
+            </button>
+
+            <div class="glass-panel rounded-3xl p-6 md:p-10 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[80px] rounded-full pointer-events-none"></div>
+
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-heading font-bold mb-2 text-white">Semester Grade Point Average</h2>
+                    <p class="text-gray-400">Enter credits and grade points for your subjects.</p>
+                </div>
+
+                <!-- Subjects Dynamic Table -->
+                <div class="bg-black/20 rounded-2xl border border-white/5 p-4 md:p-6 mb-8">
+                    <div class="hidden md:grid grid-cols-12 gap-4 mb-4 px-2 text-sm font-semibold text-gray-400">
+                        <div class="col-span-5">Subject Name (Optional)</div>
+                        <div class="col-span-3">Credits</div>
+                        <div class="col-span-3">Grade Point (1-10)</div>
+                        <div class="col-span-1 text-center">Action</div>
+                    </div>
+                    
+                    <div id="sgpa-rows" class="space-y-4">
+                        <!-- Rows injected via JS -->
+                    </div>
+
+                    <button onclick="addSgpaRow()" class="mt-6 flex items-center gap-2 text-sm font-semibold text-blue-400 hover:text-blue-300 px-4 py-2 rounded-lg hover:bg-blue-500/10 transition-colors border border-dashed border-blue-500/30 w-full justify-center">
+                        <i class="fa-solid fa-plus"></i> Add Another Subject
+                    </button>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 pt-8">
+                    <p id="sgpa-error" class="text-red-400 text-sm font-medium opacity-0 transition-opacity flex-1">Please fill valid numbers!</p>
+                    <div class="flex gap-4 w-full sm:w-auto">
+                        <button onclick="resetSgpa()" class="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium border border-white/10 transition-all">Reset</button>
+                        <button onclick="calculateSgpa()" class="flex-1 sm:flex-none px-8 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all">
+                            Calculate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Result Display Area -->
+                <div id="sgpa-result-area" class="hidden mt-10 pt-8 border-t border-white/10 text-center">
+                    <h3 class="text-xl font-medium text-gray-300 mb-6">Your SGPA Calculation Result</h3>
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-8">
+                        <div class="bg-white/5 rounded-2xl p-6 border border-white/10 w-full md:w-48">
+                            <p class="text-sm text-gray-400 uppercase tracking-wider mb-1">Total Credits</p>
+                            <p id="sgpa-out-credits" class="text-3xl font-bold text-white">0</p>
+                        </div>
+                        
+                        <!-- Circular Result -->
+                        <div class="relative w-48 h-48">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 160 160">
+                                <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="12"/>
+                                <circle id="sgpa-ring" cx="80" cy="80" r="70" fill="none" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" class="result-circle"/>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span id="sgpa-out-final" class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">0.00</span>
+                                <span class="text-xs text-gray-400 uppercase tracking-widest mt-1">SGPA</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/5 rounded-2xl p-6 border border-white/10 w-full md:w-48">
+                            <p class="text-sm text-gray-400 uppercase tracking-wider mb-1">Grade Points</p>
+                            <p id="sgpa-out-points" class="text-3xl font-bold text-white">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= VIEW 3: CGPA CALCULATOR ================= -->
+        <section id="view-cgpa" class="view-section container mx-auto px-4 sm:px-6 max-w-4xl">
+            <button onclick="switchView('view-dashboard')" class="mb-8 flex items-center gap-2 text-gray-400 hover:text-white px-4 py-2 rounded-xl hover:bg-white/5 transition-all group">
+                <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i> Back to Dashboard
+            </button>
+
+            <div class="glass-panel rounded-3xl p-6 md:p-10 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-[80px] rounded-full pointer-events-none"></div>
+
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-heading font-bold mb-2 text-white">Cumulative Grade Point Average</h2>
+                    <p class="text-gray-400">Enter the SGPA for your completed semesters.</p>
+                </div>
+
+                <!-- Semester Inputs -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Sem 1 to 6 mapped -->
+                    <div class="bg-black/20 p-5 rounded-2xl border border-white/5">
+                        <label class="block text-sm font-medium text-gray-400 mb-2">First Semester</label>
+                        <input type="number" step="0.01" min="0" max="10" class="cgpa-input glass-input w-full px-4 py-3 rounded-xl" placeholder="e.g. 8.5">
+                    </div>
+                    <div class="bg-black/20 p-5 rounded-2xl border border-white/5">
+                        <label class="block text-sm font-medium text-gray-400 mb-2">Second Semester</label>
+                        <input type="number" step="0.01" min="0" max="10" class="cgpa-input glass-input w-full px-4 py-3 rounded-xl" placeholder="e.g. 8.2">
+                    </div>
+                    <div class="bg-black/20 p-5 rounded-2xl border border-white/5">
+                        <label class="block text-sm font-medium text-gray-400 mb-2">Third Semester</label>
+                        <input type="number" step="0.01" min="0" max="10" class="cgpa-input glass-input w-full px-4 py-3 rounded-xl" placeholder="e.g. 9.0">
+                    </div>
+                    <div class="bg-black/20 p-5 rounded-2xl border border-white/5">
+                        <label class="block text-sm font-medium text-gray-400 mb-2">Fourth Semester</label>
+                        <input type="number" step="0.01" min="0" max="10" class="cgpa-input glass-input w-full px-4 py-3 rounded-xl" placeholder="Leave blank if not complete">
+                    </div>
+                    <div class="bg-black/20 p-5 rounded-2xl border border-white/5">
+                        <label class="block text-sm font-medium text-gray-400 mb-2">Fifth Semester</label>
+                        <input type="number" step="0.01" min="0" max="10" class="cgpa-input glass-input w-full px-4 py-3 rounded-xl" placeholder="Leave blank if not complete">
+                    </div>
+                    <div class="bg-black/20 p-5 rounded-2xl border border-white/5">
+                        <label class="block text-sm font-medium text-gray-400 mb-2">Sixth Semester</label>
+                        <input type="number" step="0.01" min="0" max="10" class="cgpa-input glass-input w-full px-4 py-3 rounded-xl" placeholder="Leave blank if not complete">
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 pt-8">
+                    <p id="cgpa-error" class="text-red-400 text-sm font-medium opacity-0 transition-opacity flex-1">Please enter valid SGPA (0 to 10).</p>
+                    <div class="flex gap-4 w-full sm:w-auto">
+                        <button onclick="resetCgpa()" class="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium border border-white/10 transition-all">Reset</button>
+                        <button onclick="calculateCgpa()" class="flex-1 sm:flex-none px-8 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all">
+                            Calculate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Result Display Area -->
+                <div id="cgpa-result-area" class="hidden mt-10 pt-8 border-t border-white/10 text-center">
+                    <h3 class="text-xl font-medium text-gray-300 mb-6">Your CGPA Calculation Result</h3>
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-8">
+                        <div class="bg-white/5 rounded-2xl p-6 border border-white/10 w-full md:w-48">
+                            <p class="text-sm text-gray-400 uppercase tracking-wider mb-1">Semesters</p>
+                            <p id="cgpa-out-count" class="text-3xl font-bold text-white">0</p>
+                        </div>
+                        
+                        <!-- Circular Result -->
+                        <div class="relative w-48 h-48">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 160 160">
+                                <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="12"/>
+                                <circle id="cgpa-ring" cx="80" cy="80" r="70" fill="none" stroke="#a855f7" stroke-width="12" stroke-linecap="round" class="result-circle"/>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span id="cgpa-out-final" class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">0.00</span>
+                                <span class="text-xs text-gray-400 uppercase tracking-widest mt-1">CGPA</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/5 rounded-2xl p-6 border border-white/10 w-full md:w-48">
+                            <p class="text-sm text-gray-400 uppercase tracking-wider mb-1">Average SGPA</p>
+                            <p id="cgpa-out-avg" class="text-3xl font-bold text-white">0.00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- Navigation Logic ---
+        function switchView(targetId) {
+            const views = document.querySelectorAll('.view-section');
+            views.forEach(view => {
+                view.classList.remove('active');
+                setTimeout(() => view.style.display = 'none', 400);
+            });
+
+            const targetView = document.getElementById(targetId);
+            setTimeout(() => {
+                targetView.style.display = 'block';
+                void targetView.offsetWidth; // Reflow
+                targetView.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 410);
+        }
+
+        // --- 3D Hover Effect for Dashboard Cards ---
+        document.addEventListener('mousemove', (e) => {
+            document.querySelectorAll('.card-3d').forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                // Set light source
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+
+                // Set tilt angles
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateY = ((x - centerX) / centerX) * 5; // Max 5deg
+                const rotateX = -((y - centerY) / centerY) * 5;
+                
+                card.style.setProperty('--rotate-x', `${rotateX}deg`);
+                card.style.setProperty('--rotate-y', `${rotateY}deg`);
+            });
+        });
+
+        // --- SGPA Calculator Logic ---
+        const sgpaRowsContainer = document.getElementById('sgpa-rows');
+        let rowCount = 0;
+
+        function addSgpaRow() {
+            rowCount++;
+            const row = document.createElement('div');
+            row.className = 'grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:p-0 bg-white/5 md:bg-transparent rounded-xl border border-white/10 md:border-none relative sgpa-row';
+            row.innerHTML = `
+                <div class="col-span-12 md:col-span-5">
+                    <label class="md:hidden text-xs text-gray-400 mb-1 block">Subject Name</label>
+                    <input type="text" placeholder="Subject ${rowCount}" class="glass-input w-full px-4 py-2.5 rounded-lg text-sm">
+                </div>
+                <div class="col-span-6 md:col-span-3">
+                    <label class="md:hidden text-xs text-gray-400 mb-1 block">Credits</label>
+                    <input type="number" min="1" step="1" placeholder="e.g. 4" class="sgpa-credit glass-input w-full px-4 py-2.5 rounded-lg text-sm">
+                </div>
+                <div class="col-span-6 md:col-span-3">
+                    <label class="md:hidden text-xs text-gray-400 mb-1 block">Grade Point</label>
+                    <input type="number" min="0" max="10" step="0.5" placeholder="e.g. 8" class="sgpa-grade glass-input w-full px-4 py-2.5 rounded-lg text-sm">
+                </div>
+                <div class="col-span-12 md:col-span-1 text-right md:text-center mt-2 md:mt-0">
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-300 p-2 bg-red-500/10 rounded-lg transition-colors" title="Remove Subject">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            sgpaRowsContainer.appendChild(row);
+        }
+
+        // Initialize with 5 default subjects
+        for(let i=0; i<5; i++) addSgpaRow();
+
+        function calculateSgpa() {
+            const errorMsg = document.getElementById('sgpa-error');
+            const rows = document.querySelectorAll('.sgpa-row');
+            let totalCredits = 0;
+            let totalGradePoints = 0;
+            let isValid = true;
+            let hasData = false;
+
+            rows.forEach(row => {
+                const creditInput = row.querySelector('.sgpa-credit').value;
+                const gradeInput = row.querySelector('.sgpa-grade').value;
+
+                if(creditInput !== '' || gradeInput !== '') {
+                    hasData = true;
+                    const credit = parseFloat(creditInput);
+                    const grade = parseFloat(gradeInput);
+
+                    if (isNaN(credit) || credit <= 0 || isNaN(grade) || grade < 0 || grade > 10) {
+                        isValid = false;
+                    } else {
+                        totalCredits += credit;
+                        totalGradePoints += (credit * grade);
+                    }
+                }
+            });
+
+            if (!hasData) {
+                errorMsg.textContent = "Please enter data for at least one subject.";
+                errorMsg.style.opacity = 1;
+                return;
+            }
+
+            if (!isValid) {
+                errorMsg.textContent = "Invalid entry. Credits must be > 0 and Grade Points 0-10.";
+                errorMsg.style.opacity = 1;
+                return;
+            }
+
+            errorMsg.style.opacity = 0;
+            
+            const sgpa = totalCredits === 0 ? 0 : (totalGradePoints / totalCredits);
+
+            // Update UI
+            document.getElementById('sgpa-result-area').classList.remove('hidden');
+            document.getElementById('sgpa-out-credits').textContent = totalCredits;
+            document.getElementById('sgpa-out-points').textContent = totalGradePoints.toFixed(1);
+            document.getElementById('sgpa-out-final').textContent = sgpa.toFixed(2);
+
+            // Animate Ring (440 is full dasharray)
+            const ring = document.getElementById('sgpa-ring');
+            ring.style.strokeDashoffset = 440; // reset
+            setTimeout(() => {
+                const offset = 440 - (sgpa / 10) * 440;
+                ring.style.strokeDashoffset = offset;
+            }, 50);
+        }
+
+        function resetSgpa() {
+            document.querySelectorAll('.sgpa-row input').forEach(input => input.value = '');
+            document.getElementById('sgpa-result-area').classList.add('hidden');
+            document.getElementById('sgpa-error').style.opacity = 0;
+            document.getElementById('sgpa-ring').style.strokeDashoffset = 440;
+        }
+
+        // --- CGPA Calculator Logic ---
+        function calculateCgpa() {
+            const errorMsg = document.getElementById('cgpa-error');
+            const inputs = document.querySelectorAll('.cgpa-input');
+            let totalSgpa = 0;
+            let validSemesters = 0;
+            let isValid = true;
+            let hasData = false;
+
+            inputs.forEach(input => {
+                const val = input.value;
+                if (val !== '') {
+                    hasData = true;
+                    const sgpa = parseFloat(val);
+                    if (isNaN(sgpa) || sgpa < 0 || sgpa > 10) {
+                        isValid = false;
+                    } else {
+                        totalSgpa += sgpa;
+                        validSemesters++;
+                    }
+                }
+            });
+
+            if (!hasData) {
+                errorMsg.textContent = "Please enter SGPA for at least one semester.";
+                errorMsg.style.opacity = 1;
+                return;
+            }
+
+            if (!isValid) {
+                errorMsg.textContent = "Invalid SGPA detected. Values must be between 0 and 10.";
+                errorMsg.style.opacity = 1;
+                return;
+            }
+
+            errorMsg.style.opacity = 0;
+            
+            const cgpa = totalSgpa / validSemesters;
+
+            // Update UI
+            document.getElementById('cgpa-result-area').classList.remove('hidden');
+            document.getElementById('cgpa-out-count').textContent = validSemesters;
+            document.getElementById('cgpa-out-avg').textContent = cgpa.toFixed(2);
+            document.getElementById('cgpa-out-final').textContent = cgpa.toFixed(2);
+
+            // Animate Ring (440 is full dasharray)
+            const ring = document.getElementById('cgpa-ring');
+            ring.style.strokeDashoffset = 440; // reset
+            setTimeout(() => {
+                const offset = 440 - (cgpa / 10) * 440;
+                ring.style.strokeDashoffset = offset;
+            }, 50);
+        }
+
+        function resetCgpa() {
+            document.querySelectorAll('.cgpa-input').forEach(input => input.value = '');
+            document.getElementById('cgpa-result-area').classList.add('hidden');
+            document.getElementById('cgpa-error').style.opacity = 0;
+            document.getElementById('cgpa-ring').style.strokeDashoffset = 440;
+        }
+
+    </script>
+</body>
+</html>

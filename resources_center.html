@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polytechnic Hub | Resources Center</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#050b14',
+                            surface: 'rgba(255, 255, 255, 0.03)',
+                            primary: '#10b981', // Emerald for Resources
+                            secondary: '#3b82f6', // Blue
+                            accent: '#f59e0b' // Amber
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Premium 3D & Glassmorphism Styles -->
+    <style>
+        body {
+            background-color: #050b14;
+            color: #ffffff;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 0% 20%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
+                radial-gradient(circle at 100% 80%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        /* ---------------- Section Management ---------------- */
+        .tab-section, .flow-step {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tab-section.active, .flow-step.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ---------------- Loading Animation ---------------- */
+        #global-loader {
+            background: rgba(5, 11, 20, 0.95);
+            backdrop-filter: blur(25px);
+            z-index: 9999;
+        }
+
+        .hexagon-loader {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            animation: spin-hex 3s linear infinite;
+        }
+        .hex-part {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 4px solid transparent;
+            border-top: 4px solid #10b981;
+            border-bottom: 4px solid #3b82f6;
+            border-radius: 50%;
+        }
+        .hex-part:nth-child(2) { transform: rotate(60deg); border-top-color: #f59e0b; border-bottom-color: #8b5cf6; }
+        .hex-part:nth-child(3) { transform: rotate(120deg); border-top-color: #ec4899; border-bottom-color: #06b6d4; }
+        
+        .loader-icon {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+            color: white;
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes spin-hex { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 10px rgba(16,185,129,0.5)); } 50% { filter: drop-shadow(0 0 25px rgba(59,130,246,0.8)); } }
+
+        /* ---------------- Premium 3D Cards ---------------- */
+        .perspective-grid { perspective: 1500px; }
+        
+        .card-3d {
+            transform-style: preserve-3d;
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .card-3d::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.1), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 1;
+            border-radius: inherit;
+        }
+
+        .card-3d:hover {
+            transform: translateY(-12px) rotateX(6deg) rotateY(-4deg);
+            box-shadow: 20px 25px 40px -10px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .card-3d:hover::after { opacity: 1; }
+
+        .card-content { transform: translateZ(40px); position: relative; z-index: 2; }
+        .card-icon { transform: translateZ(60px); transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); }
+        .card-3d:hover .card-icon { transform: translateZ(80px) scale(1.15); }
+
+        /* Resource Card Specific Float */
+        @keyframes float-r { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .resource-card { animation: float-r 6s ease-in-out infinite; }
+        .delay-1 { animation-delay: 0.5s; } .delay-2 { animation-delay: 1s; } .delay-3 { animation-delay: 1.5s; }
+
+        /* Notice Board Timeline */
+        .notice-card {
+            background: linear-gradient(90deg, rgba(255,255,255,0.03), transparent);
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s;
+        }
+        .notice-card:hover { background: linear-gradient(90deg, rgba(59,130,246,0.1), transparent); border-left-color: #10b981; transform: translateX(10px); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 3px; }
+
+        /* Active Nav Tab */
+        .nav-tab.active-tab {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #10b981;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-primary selection:text-white">
+
+    <!-- Global Header & Navigation -->
+    <header class="fixed w-full top-0 z-50 bg-brand-dark/80 backdrop-blur-xl border-b border-white/10">
+        <div class="container mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            
+            <!-- Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-blue-500 flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-layer-group text-white text-xl"></i>
+                </div>
+                <h1 class="text-xl font-heading font-bold tracking-wide text-white">POLYTECHNIC <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">HUB</span></h1>
+            </div>
+
+            <!-- Top Navigation Tabs -->
+            <nav class="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10 overflow-x-auto max-w-full no-scrollbar">
+                <button class="nav-tab active-tab px-5 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white transition-all whitespace-nowrap" data-target="tab-vault">
+                    <i class="fa-solid fa-vault mr-2"></i> Resource Vault
+                </button>
+                <button class="nav-tab px-5 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white transition-all whitespace-nowrap" data-target="tab-routine">
+                    <i class="fa-solid fa-calendar-days mr-2"></i> Exam Routine
+                </button>
+                <button class="nav-tab px-5 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white transition-all whitespace-nowrap" data-target="tab-notices">
+                    <i class="fa-solid fa-bell mr-2"></i> News & Notices
+                </button>
+            </nav>
+
+        </div>
+    </header>
+
+    <main class="pt-36 pb-20 min-h-screen relative flex flex-col">
+
+        <!-- ================= GLOBAL LOADER ================= -->
+        <div id="global-loader" class="fixed inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500">
+            <div class="hexagon-loader mb-6">
+                <div class="hex-part"></div>
+                <div class="hex-part"></div>
+                <div class="hex-part"></div>
+                <i class="fa-solid fa-cloud-arrow-down loader-icon"></i>
+            </div>
+            <h3 class="text-2xl font-heading font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-400 mb-2">Syncing Resources</h3>
+            <p class="text-gray-400 text-sm animate-pulse">Establishing secure connection...</p>
+        </div>
+
+
+        <!-- ================= TAB 1: RESOURCE VAULT FLOW ================= -->
+        <div id="tab-vault" class="tab-section active flex-grow container mx-auto px-6">
+            
+            <!-- Welcome Entry Point -->
+            <div id="step-welcome" class="flow-step active flex flex-col items-center justify-center text-center py-10">
+                <div class="inline-block px-4 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-sm font-medium mb-6">
+                    Premium Resource Center
+                </div>
+                <h2 class="text-5xl md:text-7xl font-heading font-extrabold mb-6 tracking-tight">
+                    Academic <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Vault</span>
+                </h2>
+                <p class="text-gray-400 max-w-2xl mx-auto text-lg mb-10">Your one-stop destination for Practical Files, Lab Manuals, Topper Notes, and highly curated study materials.</p>
+                <button id="btn-start-vault" class="group px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl font-bold text-lg text-white shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:-translate-y-1 transition-all">
+                    Access Vault <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+            </div>
+
+            <!-- Step 1: Branch Selection -->
+            <div id="step-branch" class="flow-step">
+                <div class="text-center mb-12">
+                    <p class="text-emerald-400 font-medium tracking-widest uppercase text-sm mb-2">Step 01</p>
+                    <h2 class="text-4xl md:text-5xl font-heading font-bold mb-3">Select <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">Branch</span></h2>
+                    <p class="text-gray-400">Choose your engineering discipline to access dedicated resources.</p>
+                </div>
+                <div id="grid-branch" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 perspective-grid max-w-7xl mx-auto"></div>
+            </div>
+
+            <!-- Step 2: Semester Selection -->
+            <div id="step-semester" class="flow-step">
+                <div class="max-w-6xl mx-auto mb-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <button class="btn-back-branch flex items-center gap-2 text-gray-400 hover:text-white px-4 py-2 rounded-xl border border-white/5 hover:bg-white/5 transition-all group">
+                        <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i> Branches
+                    </button>
+                    <div class="px-5 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group"></i> <span id="lbl-branch" class="font-semibold">Selected Branch</span>
+                    </div>
+                </div>
+                <div class="text-center mb-12">
+                    <p class="text-blue-400 font-medium tracking-widest uppercase text-sm mb-2">Step 02</p>
+                    <h2 class="text-4xl md:text-5xl font-heading font-bold mb-3">Select <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Semester</span></h2>
+                    <p class="text-gray-400">Choose your current semester.</p>
+                </div>
+                <div id="grid-semester" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 perspective-grid max-w-5xl mx-auto"></div>
+            </div>
+
+            <!-- Step 3: Resource Dashboard -->
+            <div id="step-resource" class="flow-step">
+                <div class="max-w-6xl mx-auto mb-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <button class="btn-back-sem flex items-center gap-2 text-gray-400 hover:text-white px-4 py-2 rounded-xl border border-white/5 hover:bg-white/5 transition-all group">
+                        <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i> Semesters
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <span class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-300 text-xs font-medium" id="lbl-dash-branch">Branch</span>
+                        <span class="px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-semibold" id="lbl-dash-sem">Semester</span>
+                    </div>
+                </div>
+                <div class="text-center mb-12">
+                    <p class="text-amber-400 font-medium tracking-widest uppercase text-sm mb-2">Final Step</p>
+                    <h2 class="text-4xl md:text-5xl font-heading font-bold mb-3">Resource <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">Dashboard</span></h2>
+                    <p class="text-gray-400">Select a category to view materials.</p>
+                </div>
+                <div id="grid-resource" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 perspective-grid max-w-6xl mx-auto"></div>
+            </div>
+
+        </div>
+
+
+        <!-- ================= TAB 2: EXAM ROUTINE (STANDALONE) ================= -->
+        <div id="tab-routine" class="tab-section container mx-auto px-6 max-w-5xl">
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-500/20 text-blue-400 mb-6 border border-blue-500/30">
+                    <i class="fa-solid fa-calendar-check text-2xl"></i>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-heading font-bold mb-4">Exam <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Routine & Schedule</span></h2>
+                <p class="text-gray-400">Stay updated with the latest academic calendar and examination dates.</p>
+            </div>
+
+            <!-- Future Ready Routine Layout -->
+            <div class="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-10 backdrop-blur-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4">
+                    <span class="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/30 animate-pulse">Latest Status: Prepared</span>
+                </div>
+                
+                <h3 class="text-2xl font-bold mb-8 border-b border-white/10 pb-4">Upcoming Examinations</h3>
+                
+                <div class="space-y-6">
+                    <!-- Schedule Item -->
+                    <div class="flex flex-col md:flex-row gap-6 items-start p-5 rounded-2xl bg-black/20 border border-white/5 hover:border-blue-500/30 transition-colors">
+                        <div class="w-full md:w-32 text-center md:text-left shrink-0 border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-4">
+                            <p class="text-3xl font-bold text-blue-400">15</p>
+                            <p class="text-sm text-gray-400 uppercase font-medium">May 2026</p>
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="text-xl font-bold text-white mb-2">Even Semester Final Theory Exams</h4>
+                            <p class="text-gray-400 text-sm mb-3">All Branches (2nd, 4th, 6th Semesters). Detailed subject-wise routine will be published shortly.</p>
+                            <span class="inline-block px-3 py-1 bg-white/10 rounded text-xs text-gray-300"><i class="fa-solid fa-clock mr-1"></i> 10:00 AM - 01:00 PM</span>
+                        </div>
+                    </div>
+
+                    <!-- Schedule Item -->
+                    <div class="flex flex-col md:flex-row gap-6 items-start p-5 rounded-2xl bg-black/20 border border-white/5 hover:border-purple-500/30 transition-colors">
+                        <div class="w-full md:w-32 text-center md:text-left shrink-0 border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-4">
+                            <p class="text-3xl font-bold text-purple-400">01</p>
+                            <p class="text-sm text-gray-400 uppercase font-medium">Jun 2026</p>
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="text-xl font-bold text-white mb-2">Practical & Lab Examinations</h4>
+                            <p class="text-gray-400 text-sm mb-3">Internal and External lab evaluations for all respective branches.</p>
+                            <span class="inline-block px-3 py-1 bg-white/10 rounded text-xs text-gray-300"><i class="fa-solid fa-building mr-1"></i> Respective Labs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Placeholder Alert -->
+                <div class="mt-10 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm text-center flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-circle-info"></i> Full PDF routines will be integrated in future development phases.
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================= TAB 3: LATEST NEWS & NOTICES (STANDALONE) ================= -->
+        <div id="tab-notices" class="tab-section container mx-auto px-6 max-w-5xl">
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-500/20 text-rose-400 mb-6 border border-rose-500/30">
+                    <i class="fa-solid fa-bullhorn text-2xl"></i>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-heading font-bold mb-4">Latest <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-orange-400">News & Notices</span></h2>
+                <p class="text-gray-400">Important announcements, board updates, and platform news.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Notice 1 -->
+                <div class="notice-card p-6 rounded-2xl backdrop-blur-sm border border-white/5 relative overflow-hidden group">
+                    <div class="absolute top-4 right-4 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider animate-pulse">New</div>
+                    <p class="text-xs text-blue-400 font-semibold mb-2"><i class="fa-solid fa-calendar mr-1"></i> Today</p>
+                    <h3 class="text-xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">Resources Center V1.0 Launched</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">The new premium Resources Center structure is now live. Students can browse through branch and semester structures smoothly.</p>
+                </div>
+
+                <!-- Notice 2 -->
+                <div class="notice-card p-6 rounded-2xl backdrop-blur-sm border border-white/5 relative overflow-hidden group">
+                    <p class="text-xs text-emerald-400 font-semibold mb-2"><i class="fa-solid fa-calendar mr-1"></i> Yesterday</p>
+                    <h3 class="text-xl font-bold text-white mb-3 group-hover:text-emerald-400 transition-colors">Scholarship Forms Available</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">State government scholarship forms for the current academic year are now available on the official portal. Last date applies.</p>
+                </div>
+
+                <!-- Notice 3 -->
+                <div class="notice-card p-6 rounded-2xl backdrop-blur-sm border border-white/5 relative overflow-hidden group">
+                    <p class="text-xs text-purple-400 font-semibold mb-2"><i class="fa-solid fa-calendar mr-1"></i> Last Week</p>
+                    <h3 class="text-xl font-bold text-white mb-3 group-hover:text-purple-400 transition-colors">PYQ Hub Preparation Complete</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">The structural foundation for the Previous Year Questions Hub has been successfully deployed and is awaiting database linkage.</p>
+                </div>
+
+                <!-- Notice 4 -->
+                <div class="notice-card p-6 rounded-2xl backdrop-blur-sm border border-white/5 relative overflow-hidden group">
+                    <p class="text-xs text-gray-400 font-semibold mb-2"><i class="fa-solid fa-calendar mr-1"></i> Academic Board</p>
+                    <h3 class="text-xl font-bold text-white mb-3 group-hover:text-gray-300 transition-colors">Revised Syllabus Notice</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Please note that the syllabus for first-year standard subjects has been mildly revised. Updates will reflect in the PDF Hub soon.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Global Toast for Placeholder Actions -->
+    <div id="toast" class="fixed bottom-[-100px] left-1/2 transform -translate-x-1/2 bg-black/90 backdrop-blur-xl border border-emerald-500/30 text-white px-6 py-4 rounded-full flex items-center gap-4 transition-all duration-500 z-[100] shadow-[0_10px_40px_rgba(16,185,129,0.3)]">
+        <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-shield-check text-emerald-400"></i>
+        </div>
+        <div>
+            <p class="font-bold text-sm text-white">Structure Successfully Reached</p>
+            <p class="text-xs text-gray-400">As per requirements, no PDFs or downloads exist yet.</p>
+        </div>
+    </div>
+
+    <!-- JavaScript Data & Core Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- DATA CONFIGURATION ---
+            const branches = [
+                { id: 'ee', name: "Electrical Engineering", icon: "fa-bolt", color: "text-yellow-400", border: "rgba(250,204,21,0.3)" },
+                { id: 'cse', name: "Computer Science Engg.", icon: "fa-laptop-code", color: "text-cyan-400", border: "rgba(6,182,212,0.3)" },
+                { id: 'me', name: "Mechanical Engineering", icon: "fa-gear", color: "text-gray-400", border: "rgba(156,163,175,0.4)" },
+                { id: 'ce', name: "Civil Engineering", icon: "fa-building", color: "text-orange-400", border: "rgba(249,115,22,0.3)" },
+                { id: 'ece', name: "Electronics Engineering", icon: "fa-microchip", color: "text-purple-400", border: "rgba(168,85,247,0.3)" },
+                { id: 'ae', name: "Automobile Engineering", icon: "fa-car-side", color: "text-red-400", border: "rgba(239,68,68,0.3)" },
+                { id: 'it', name: "Information Technology", icon: "fa-network-wired", color: "text-blue-400", border: "rgba(59,130,246,0.3)" },
+                { id: 'che', name: "Chemical Engineering", icon: "fa-flask", color: "text-emerald-400", border: "rgba(16,185,129,0.3)" },
+                { id: 'pe', name: "Production Engineering", icon: "fa-industry", color: "text-amber-400", border: "rgba(245,158,11,0.3)" },
+                { id: 'aero', name: "Aeronautical Engineering", icon: "fa-plane-up", color: "text-sky-400", border: "rgba(14,165,233,0.3)" }
+            ];
+
+            const semesters = [
+                { name: "First Semester", icon: "fa-1", border: "rgba(59,130,246,0.3)", color: "text-blue-400" },
+                { name: "Second Semester", icon: "fa-2", border: "rgba(16,185,129,0.3)", color: "text-emerald-400" },
+                { name: "Third Semester", icon: "fa-3", border: "rgba(249,115,22,0.3)", color: "text-orange-400" },
+                { name: "Fourth Semester", icon: "fa-4", border: "rgba(239,68,68,0.3)", color: "text-red-400" },
+                { name: "Fifth Semester", icon: "fa-5", border: "rgba(234,179,8,0.3)", color: "text-yellow-400" },
+                { name: "Sixth Semester", icon: "fa-6", border: "rgba(168,85,247,0.3)", color: "text-purple-400" }
+            ];
+
+            const resources = [
+                { name: "Practical Files", icon: "fa-book-open", bg: "from-blue-500/20 to-cyan-500/10", border: "rgba(59,130,246,0.3)", text: "text-blue-400", anim: "" },
+                { name: "Lab Manual", icon: "fa-flask-vial", bg: "from-emerald-500/20 to-teal-500/10", border: "rgba(16,185,129,0.3)", text: "text-emerald-400", anim: "delay-1" },
+                { name: "Formula Sheet", icon: "fa-square-root-variable", bg: "from-purple-500/20 to-fuchsia-500/10", border: "rgba(168,85,247,0.3)", text: "text-purple-400", anim: "delay-2" },
+                { name: "Important Questions", icon: "fa-circle-question", bg: "from-rose-500/20 to-pink-500/10", border: "rgba(244,63,94,0.3)", text: "text-rose-400", anim: "delay-1" },
+                { name: "Topper Notes", icon: "fa-star", bg: "from-amber-500/20 to-yellow-500/10", border: "rgba(245,158,11,0.3)", text: "text-amber-400", anim: "delay-2" },
+                { name: "Study Materials", icon: "fa-layer-group", bg: "from-indigo-500/20 to-blue-500/10", border: "rgba(99,102,241,0.3)", text: "text-indigo-400", anim: "" }
+            ];
+
+            // --- STATE & DOM ---
+            let state = { branch: '', semester: '' };
+            const loader = document.getElementById('global-loader');
+            const toast = document.getElementById('toast');
+            let toastTimer;
+
+            // DOM Grids
+            const gridBranch = document.getElementById('grid-branch');
+            const gridSemester = document.getElementById('grid-semester');
+            const gridResource = document.getElementById('grid-resource');
+
+            // Flow Steps
+            const steps = {
+                welcome: document.getElementById('step-welcome'),
+                branch: document.getElementById('step-branch'),
+                semester: document.getElementById('step-semester'),
+                resource: document.getElementById('step-resource')
+            };
+
+            // Main Tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            const tabSections = document.querySelectorAll('.tab-section');
+
+            // --- RENDER FUNCTIONS ---
+            function initGrids() {
+                // Render Branches
+                branches.forEach((b, i) => {
+                    const card = document.createElement('div');
+                    card.className = "card-3d h-full p-6 flex flex-col items-center text-center group";
+                    card.style.boxShadow = `inset 0 0 0 1px ${b.border}`;
+                    card.innerHTML = `
+                        <div class="card-icon w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 mb-4 group-hover:bg-white/10 transition-colors shadow-lg">
+                            <i class="fa-solid ${b.icon} text-3xl ${b.color} drop-shadow-md"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-lg font-bold text-gray-100">${b.name}</h3>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => {
+                        state.branch = b.name;
+                        document.getElementById('lbl-branch').textContent = b.name;
+                        document.getElementById('lbl-dash-branch').textContent = b.name;
+                        triggerFlowTransition(steps.branch, steps.semester);
+                    });
+                    gridBranch.appendChild(card);
+                });
+
+                // Render Semesters
+                semesters.forEach(s => {
+                    const card = document.createElement('div');
+                    card.className = "card-3d h-full p-8 flex flex-col items-center text-center group";
+                    card.style.boxShadow = `inset 0 0 0 1px ${s.border}`;
+                    card.innerHTML = `
+                        <div class="card-icon w-20 h-20 rounded-full bg-black/30 flex items-center justify-center border border-white/10 mb-5 shadow-inner">
+                            <i class="fa-solid ${s.icon} text-4xl ${s.color} drop-shadow-md"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-2xl font-bold text-white mb-2">${s.name}</h3>
+                            <p class="text-xs text-gray-400 group-hover:text-emerald-400 transition-colors">Select to proceed</p>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => {
+                        state.semester = s.name;
+                        document.getElementById('lbl-dash-sem').textContent = s.name;
+                        triggerFlowTransition(steps.semester, steps.resource);
+                    });
+                    gridSemester.appendChild(card);
+                });
+
+                // Render Resources Dashboard
+                resources.forEach(r => {
+                    const card = document.createElement('div');
+                    card.className = `card-3d resource-card ${r.anim} h-full p-8 flex flex-col justify-between group`;
+                    card.style.boxShadow = `inset 0 0 0 1px ${r.border}`;
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between mb-8 card-icon">
+                            <div class="w-14 h-14 rounded-xl bg-gradient-to-br ${r.bg} flex items-center justify-center border border-white/10 shadow-lg">
+                                <i class="fa-solid ${r.icon} text-2xl ${r.text}"></i>
+                            </div>
+                            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors border border-white/5">
+                                <i class="fa-solid fa-arrow-right text-xs text-gray-400 group-hover:text-white transition-colors"></i>
+                            </div>
+                        </div>
+                        <div class="card-content text-left">
+                            <h3 class="text-2xl font-bold text-white mb-1">${r.name}</h3>
+                            <p class="text-xs text-gray-400 font-medium tracking-wide uppercase">Vault Collection</p>
+                        </div>
+                    `;
+                    // STOP HERE INSTRUCTION: Show placeholder toast
+                    card.addEventListener('click', showToast);
+                    gridResource.appendChild(card);
+                });
+            }
+
+            // --- LOGIC FUNCTIONS ---
+            function switchTab(targetId) {
+                // Update Buttons
+                tabs.forEach(t => {
+                    t.classList.remove('active-tab');
+                    if(t.dataset.target === targetId) t.classList.add('active-tab');
+                });
+
+                // Update Sections (No loader for tabs, just smooth crossfade)
+                tabSections.forEach(s => {
+                    s.classList.remove('active');
+                    setTimeout(() => s.style.display = 'none', 400);
+                });
+
+                const targetSection = document.getElementById(targetId);
+                setTimeout(() => {
+                    targetSection.style.display = 'block';
+                    void targetSection.offsetWidth;
+                    targetSection.classList.add('active');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 410);
+            }
+
+            function triggerFlowTransition(currentStep, nextStep) {
+                // Internal Flow uses the Loader
+                currentStep.classList.remove('active');
+                
+                loader.style.pointerEvents = 'all';
+                loader.classList.remove('opacity-0');
+                loader.classList.add('opacity-100');
+
+                setTimeout(() => {
+                    currentStep.style.display = 'none';
+                    loader.classList.remove('opacity-100');
+                    loader.classList.add('opacity-0');
+                    loader.style.pointerEvents = 'none';
+                    
+                    nextStep.style.display = 'block';
+                    void nextStep.offsetWidth;
+                    nextStep.classList.add('active');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 1500); // 1.5s premium loading
+            }
+
+            function quickFlowTransition(currentStep, targetStep) {
+                // Back buttons (No Loader, faster transition)
+                currentStep.classList.remove('active');
+                setTimeout(() => {
+                    currentStep.style.display = 'none';
+                    targetStep.style.display = 'block';
+                    void targetStep.offsetWidth;
+                    targetStep.classList.add('active');
+                }, 400);
+            }
+
+            function showToast() {
+                clearTimeout(toastTimer);
+                toast.style.bottom = '30px';
+                toastTimer = setTimeout(() => {
+                    toast.style.bottom = '-100px';
+                }, 3500);
+            }
+
+            // --- EVENT BINDING ---
+            
+            // Tab Navigation
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    // Start loader when clicking resources center tab if it wasn't active
+                    if(!tab.classList.contains('active-tab') && tab.dataset.target === 'tab-vault') {
+                        // Optional: Reset flow to welcome if desired. Keeping state is better UX.
+                    }
+                    switchTab(tab.dataset.target);
+                });
+            });
+
+            // Vault Flow Navigation
+            document.getElementById('btn-start-vault').addEventListener('click', () => {
+                triggerFlowTransition(steps.welcome, steps.branch);
+            });
+
+            document.querySelector('.btn-back-branch').addEventListener('click', () => {
+                quickFlowTransition(steps.semester, steps.branch);
+            });
+
+            document.querySelector('.btn-back-sem').addEventListener('click', () => {
+                quickFlowTransition(steps.resource, steps.semester);
+            });
+
+            // 3D Hover Tracking for Lighting
+            document.addEventListener('mousemove', (e) => {
+                document.querySelectorAll('.card-3d').forEach(card => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                });
+            });
+
+            // Init
+            initGrids();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polytechnic Hub | Premium Quiz Platform</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                        hindi: ['Noto Sans Devanagari', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#020617', // Slate 950
+                            card: 'rgba(255, 255, 255, 0.03)',
+                            primary: '#4f46e5', // Indigo 600
+                            secondary: '#9333ea', // Purple 600
+                            accent: '#06b6d4' // Cyan 500
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS for Premium UI & Animations -->
+    <style>
+        body {
+            background-color: #020617;
+            color: #ffffff;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.15) 0px, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(147, 51, 234, 0.15) 0px, transparent 40%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        /* View Management */
+        .view-section {
+            display: none;
+            opacity: 0;
+            transform: scale(0.98);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .view-section.active {
+            display: block;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            background: rgba(2, 6, 23, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 9999;
+        }
+        .loader-ring {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top: 4px solid #4f46e5;
+            border-right: 4px solid #9333ea;
+            animation: spin 1.5s linear infinite;
+        }
+        .loader-ring::before {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-bottom: 4px solid #06b6d4;
+            border-left: 4px solid #3b82f6;
+            animation: spin-reverse 2s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin-reverse { 0% { transform: rotate(360deg); } 100% { transform: rotate(-360deg); } }
+
+        /* Premium 3D Cards */
+        .card-container { perspective: 1200px; }
+        .card-3d {
+            transform-style: preserve-3d;
+            background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+        .card-3d:hover {
+            transform: translateY(-10px) rotateX(5deg) rotateY(-5deg);
+            box-shadow: 15px 20px 40px -10px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.2);
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+        }
+        .card-content { transform: translateZ(30px); }
+        .icon-wrapper { transform: translateZ(50px); transition: transform 0.4s; }
+        .card-3d:hover .icon-wrapper { transform: translateZ(70px) scale(1.1); }
+
+        /* Quiz UI Elements */
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Circular Timer */
+        .timer-circle {
+            transition: stroke-dashoffset 1s linear;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        /* Options Styling & Animations */
+        .option-btn {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-btn.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .option-btn.selected {
+            background: rgba(79, 70, 229, 0.2);
+            border-color: #4f46e5;
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+        }
+        
+        /* Language Toggle Switch */
+        .lang-switch-bg { transition: background-color 0.3s; }
+        .lang-switch-knob { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Progress Bar */
+        .progress-fill { transition: width 0.4s ease-in-out; }
+
+        /* Blinking Cursor for Typing */
+        .cursor::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+            color: #06b6d4;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Result Circular Progress */
+        .result-circle {
+            stroke-dasharray: 440;
+            stroke-dashoffset: 440;
+            transition: stroke-dashoffset 1.5s ease-out;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 3px; }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-primary selection:text-white flex flex-col min-h-screen">
+
+    <!-- Header Navigation -->
+    <header class="fixed w-full top-0 z-40 bg-brand-dark/80 backdrop-blur-xl border-b border-white/10">
+        <div class="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-primary to-brand-accent flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-graduation-cap text-white text-xl"></i>
+                </div>
+                <h1 class="text-xl font-heading font-bold tracking-wide text-white">POLYTECHNIC <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">HUB</span></h1>
+            </div>
+            <div class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm font-semibold text-white flex items-center gap-2">
+                <i class="fa-solid fa-laptop-code text-cyan-400"></i> <span class="hidden sm:inline">Quiz Section</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow pt-24 pb-12 flex flex-col justify-center relative z-10">
+
+        <!-- ================= LOADING SCREEN ================= -->
+        <div id="loading-screen" class="fixed inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500">
+            <div class="relative flex justify-center items-center mb-6">
+                <div class="loader-ring absolute"></div>
+                <i class="fa-solid fa-brain text-4xl text-white animate-pulse"></i>
+            </div>
+            <h3 class="text-2xl font-heading font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-2">Preparing Quiz Environment</h3>
+            <p class="text-gray-400 text-sm animate-pulse">Loading premium questions...</p>
+        </div>
+
+        <!-- ================= VIEW 1: SEMESTER SELECTION ================= -->
+        <section id="view-semester" class="view-section active container mx-auto px-4 sm:px-6">
+            <div class="text-center mb-12">
+                <p class="text-brand-accent font-medium tracking-widest uppercase text-xs sm:text-sm mb-2">Step 1 of 2</p>
+                <h2 class="text-3xl sm:text-5xl font-heading font-bold mb-4">Select <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Semester</span></h2>
+                <p class="text-gray-400">Choose your current semester to fetch relevant technical questions.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto" id="semester-grid">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- ================= VIEW 2: BRANCH SELECTION ================= -->
+        <section id="view-branch" class="view-section container mx-auto px-4 sm:px-6">
+            <div class="max-w-6xl mx-auto mb-8 flex flex-wrap items-center justify-between gap-4">
+                <button class="btn-back-sem flex items-center gap-2 text-gray-400 hover:text-white px-4 py-2 rounded-xl hover:bg-white/5 transition-all group">
+                    <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i> Back
+                </button>
+                <div class="px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-sm font-medium">
+                    <i class="fa-solid fa-layer-group mr-2"></i> <span id="lbl-sem">Sem</span>
+                </div>
+            </div>
+            <div class="text-center mb-12">
+                <p class="text-brand-secondary font-medium tracking-widest uppercase text-xs sm:text-sm mb-2">Step 2 of 2</p>
+                <h2 class="text-3xl sm:text-5xl font-heading font-bold mb-4">Select <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Branch</span></h2>
+                <p class="text-gray-400">Select your engineering discipline to start the quiz.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-6xl mx-auto" id="branch-grid">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- ================= VIEW 3: QUIZ DASHBOARD ================= -->
+        <section id="view-quiz" class="view-section container mx-auto px-4 sm:px-6 max-w-5xl">
+            
+            <!-- Premium Header Info -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <div class="flex items-center gap-3">
+                    <button class="btn-exit-quiz w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-red-500/20 hover:border-red-500/50 border border-transparent transition-all" title="Exit Quiz">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <div>
+                        <h2 class="text-lg font-bold text-white leading-tight">Technical Quiz</h2>
+                        <p class="text-xs text-gray-400"><span id="quiz-sem-lbl">Sem</span> • <span id="quiz-branch-lbl" class="text-cyan-400">Branch</span></p>
+                    </div>
+                </div>
+
+                <!-- Language Toggle -->
+                <div class="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                    <span class="text-xs font-semibold text-gray-400" id="lang-en">ENG</span>
+                    <button id="lang-toggle" class="w-12 h-6 rounded-full lang-switch-bg bg-brand-primary relative cursor-pointer outline-none">
+                        <div id="lang-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 lang-switch-knob shadow-sm"></div>
+                    </button>
+                    <span class="text-xs font-semibold text-gray-400 font-hindi" id="lang-hi">हिंदी</span>
+                </div>
+            </div>
+
+            <!-- Main Quiz Container (Glassmorphism) -->
+            <div class="glass-panel rounded-3xl overflow-hidden relative">
+                
+                <!-- Progress Bar Top -->
+                <div class="h-1.5 w-full bg-white/5 relative">
+                    <div id="progress-bar" class="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-400 to-blue-500 progress-fill w-0"></div>
+                </div>
+
+                <div class="p-6 md:p-10">
+                    <!-- Quiz Header (Timer & Q Num) -->
+                    <div class="flex justify-between items-end border-b border-white/10 pb-6 mb-8">
+                        <div>
+                            <span class="text-sm font-medium text-brand-accent uppercase tracking-wider mb-1 block">Question</span>
+                            <div class="text-3xl md:text-4xl font-heading font-bold text-white">
+                                <span id="current-q-num">1</span><span class="text-gray-500 text-xl md:text-2xl">/10</span>
+                            </div>
+                        </div>
+
+                        <!-- Circular Timer -->
+                        <div class="relative w-16 h-16 flex items-center justify-center">
+                            <svg class="w-full h-full" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6"/>
+                                <circle id="timer-ring" cx="50" cy="50" r="45" fill="none" stroke="#06b6d4" stroke-width="6" stroke-linecap="round" class="timer-circle" stroke-dasharray="283" stroke-dashoffset="0"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center flex-col">
+                                <span id="timer-text" class="text-xl font-bold text-white leading-none">30</span>
+                                <span class="text-[8px] text-gray-400 uppercase tracking-widest mt-0.5">sec</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question Area -->
+                    <div class="min-h-[100px] mb-8">
+                        <h3 id="question-text" class="text-xl md:text-2xl font-medium leading-relaxed text-gray-100 cursor transition-all duration-300">
+                            <!-- Typed dynamically -->
+                        </h3>
+                    </div>
+
+                    <!-- Options Area -->
+                    <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Buttons injected via JS -->
+                    </div>
+
+                </div>
+
+                <!-- Footer Controls -->
+                <div class="bg-black/20 px-6 md:px-10 py-5 border-t border-white/5 flex items-center justify-between">
+                    <button id="btn-prev" class="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-angle-left mr-2"></i> Previous
+                    </button>
+                    
+                    <button id="btn-next" class="px-8 py-2.5 rounded-xl text-sm font-bold text-white bg-brand-primary hover:bg-indigo-500 shadow-[0_0_15px_rgba(79,70,229,0.4)] transition-all">
+                        Next <i class="fa-solid fa-angle-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 4: RESULT PAGE ================= -->
+        <section id="view-result" class="view-section container mx-auto px-4 sm:px-6 max-w-4xl text-center">
+            
+            <div class="glass-panel rounded-3xl p-8 md:p-12 relative overflow-hidden">
+                <!-- Decorative background elements -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-brand-primary/20 blur-[80px] rounded-full"></div>
+                
+                <h2 class="text-3xl font-heading font-bold mb-2">Quiz Completed!</h2>
+                <p id="motivational-msg" class="text-gray-400 mb-10 text-lg">Analyzing your performance...</p>
+
+                <!-- Circular Score Display -->
+                <div class="relative w-48 h-48 mx-auto mb-10">
+                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 160 160">
+                        <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="12"/>
+                        <circle id="result-ring" cx="80" cy="80" r="70" fill="none" stroke="#9333ea" stroke-width="12" stroke-linecap="round" class="result-circle"/>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="final-percent" class="text-4xl font-bold text-white mb-1">0%</span>
+                        <span class="text-xs text-gray-400 uppercase tracking-widest">Score</span>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-4">
+                        <p class="text-gray-400 text-xs uppercase tracking-wider mb-1">Total</p>
+                        <p class="text-2xl font-bold text-white">10</p>
+                    </div>
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-4">
+                        <p class="text-gray-400 text-xs uppercase tracking-wider mb-1">Attempted</p>
+                        <p id="res-attempted" class="text-2xl font-bold text-blue-400">0</p>
+                    </div>
+                    <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4">
+                        <p class="text-emerald-400 text-xs uppercase tracking-wider mb-1">Correct</p>
+                        <p id="res-correct" class="text-2xl font-bold text-emerald-400">0</p>
+                    </div>
+                    <div class="bg-red-500/10 border border-red-500/20 rounded-2xl p-4">
+                        <p class="text-red-400 text-xs uppercase tracking-wider mb-1">Wrong</p>
+                        <p id="res-wrong" class="text-2xl font-bold text-red-400">0</p>
+                    </div>
+                </div>
+
+                <!-- Performance Banner -->
+                <div id="performance-banner" class="inline-block px-6 py-3 rounded-full text-lg font-bold border mb-8">
+                    Performance Level
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <button class="btn-exit-quiz px-8 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium transition-all">
+                        Back to Home
+                    </button>
+                    <button id="btn-restart" class="px-8 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold shadow-lg transition-all">
+                        Retake Quiz <i class="fa-solid fa-rotate-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // ================== DATA CONFIGURATION ==================
+            
+            const semesters = [
+                { id: 1, name: "First Semester", icon: "fa-1", color: "from-blue-500/20 to-cyan-500/10", border: "rgba(59,130,246,0.3)" },
+                { id: 2, name: "Second Semester", icon: "fa-2", color: "from-emerald-500/20 to-green-500/10", border: "rgba(16,185,129,0.3)" },
+                { id: 3, name: "Third Semester", icon: "fa-3", color: "from-orange-500/20 to-yellow-500/10", border: "rgba(249,115,22,0.3)" },
+                { id: 4, name: "Fourth Semester", icon: "fa-4", color: "from-red-500/20 to-rose-500/10", border: "rgba(239,68,68,0.3)" },
+                { id: 5, name: "Fifth Semester", icon: "fa-5", color: "from-yellow-500/20 to-amber-500/10", border: "rgba(234,179,8,0.3)" },
+                { id: 6, name: "Sixth Semester", icon: "fa-6", color: "from-purple-500/20 to-fuchsia-500/10", border: "rgba(168,85,247,0.3)" }
+            ];
+
+            const branches = [
+                { id: 'ee', name: "Electrical Engineering", icon: "fa-bolt", color: "text-yellow-400" },
+                { id: 'cse', name: "Computer Science Engg.", icon: "fa-laptop-code", color: "text-cyan-400" },
+                { id: 'me', name: "Mechanical Engineering", icon: "fa-gear", color: "text-gray-400" },
+                { id: 'ce', name: "Civil Engineering", icon: "fa-building", color: "text-orange-400" },
+                { id: 'ece', name: "Electronics Engineering", icon: "fa-microchip", color: "text-purple-400" },
+                { id: 'ae', name: "Automobile Engineering", icon: "fa-car-side", color: "text-red-400" },
+                { id: 'it', name: "Information Technology", icon: "fa-network-wired", color: "text-blue-400" },
+                { id: 'che', name: "Chemical Engineering", icon: "fa-flask", color: "text-emerald-400" },
+                { id: 'pe', name: "Production Engineering", icon: "fa-industry", color: "text-amber-400" },
+                { id: 'aero', name: "Aeronautical Engineering", icon: "fa-plane-up", color: "text-sky-400" }
+            ];
+
+            // 10 High Quality Polytechnic Level Questions (Bilingual)
+            const quizData = [
+                {
+                    en: { q: "According to Ohm's law, if voltage increases and resistance remains constant, what happens to the current?", options: ["Decreases", "Increases", "Remains same", "Becomes zero"] },
+                    hi: { q: "ओम के नियम के अनुसार, यदि वोल्टेज बढ़ता है और प्रतिरोध स्थिर रहता है, तो धारा (current) का क्या होता है?", options: ["घटती है", "बढ़ती है", "समान रहती है", "शून्य हो जाती है"] },
+                    correct: 1
+                },
+                {
+                    en: { q: "Which programming language is known as the mother of all modern languages?", options: ["Python", "Java", "C Language", "HTML"] },
+                    hi: { q: "किस प्रोग्रामिंग भाषा को सभी आधुनिक भाषाओं की जननी कहा जाता है?", options: ["पायथन", "जावा", "सी भाषा (C)", "एचटीएमएल (HTML)"] },
+                    correct: 2
+                },
+                {
+                    en: { q: "In thermodynamics, an isochoric process is one in which the ________ remains constant.", options: ["Pressure", "Temperature", "Volume", "Heat"] },
+                    hi: { q: "ऊष्मप्रवैगिकी में, समआयतनिक (isochoric) प्रक्रिया वह है जिसमें ________ स्थिर रहता है।", options: ["दबाव", "तापमान", "आयतन", "ऊष्मा"] },
+                    correct: 2
+                },
+                {
+                    en: { q: "Which material is universally used as a semiconductor in electronic chips?", options: ["Copper", "Silicon", "Aluminum", "Iron"] },
+                    hi: { q: "इलेक्ट्रॉनिक चिप्स में अर्धचालक के रूप में सार्वभौमिक रूप से किस सामग्री का उपयोग किया जाता है?", options: ["तांबा", "सिलिकॉन", "एल्युमिनियम", "लोहा"] },
+                    correct: 1
+                },
+                {
+                    en: { q: "What is the primary function of a transformer?", options: ["Convert AC to DC", "Convert DC to AC", "Step up or step down voltage", "Generate electricity"] },
+                    hi: { q: "ट्रांसफार्मर का प्राथमिक कार्य क्या है?", options: ["AC को DC में बदलना", "DC को AC में बदलना", "वोल्टेज को बढ़ाना या घटाना", "बिजली उत्पन्न करना"] },
+                    correct: 2
+                },
+                {
+                    en: { q: "In civil engineering, the compressive strength of concrete is measured after how many days of curing generally?", options: ["7 days", "14 days", "21 days", "28 days"] },
+                    hi: { q: "सिविल इंजीनियरिंग में, कंक्रीट की संपीड़न शक्ति (compressive strength) आमतौर पर कितने दिनों के तराई के बाद मापी जाती है?", options: ["7 दिन", "14 दिन", "21 दिन", "28 दिन"] },
+                    correct: 3
+                },
+                {
+                    en: { q: "Which type of gear is used to connect two intersecting shafts?", options: ["Spur Gear", "Helical Gear", "Bevel Gear", "Worm Gear"] },
+                    hi: { q: "दो प्रतिच्छेदी शाफ्ट (intersecting shafts) को जोड़ने के लिए किस प्रकार के गियर का उपयोग किया जाता है?", options: ["स् Spur गियर", "हेलिकल गियर", "बेवल गियर", "वर्म गियर"] },
+                    correct: 2
+                },
+                {
+                    en: { q: "What does 'LAN' stand for in computer networking?", options: ["Local Area Network", "Large Area Network", "Logical Area Network", "Linked Area Network"] },
+                    hi: { q: "कंप्यूटर नेटवर्किंग में 'LAN' का क्या अर्थ है?", options: ["लोकल एरिया नेटवर्क", "लार्ज एरिया नेटवर्क", "लॉजिकल एरिया नेटवर्क", "लिंक्ड एरिया नेटवर्क"] },
+                    correct: 0
+                },
+                {
+                    en: { q: "Which device converts mechanical energy into electrical energy?", options: ["Electric Motor", "Generator", "Transformer", "Battery"] },
+                    hi: { q: "कौन सा उपकरण यांत्रिक ऊर्जा को विद्युत ऊर्जा में परिवर्तित करता है?", options: ["इलेक्ट्रिक मोटर", "जनरेटर", "ट्रांसफार्मर", "बैटरी"] },
+                    correct: 1
+                },
+                {
+                    en: { q: "The ratio of stress to strain within the elastic limit is known as:", options: ["Poisson's ratio", "Bulk modulus", "Young's modulus", "Shear modulus"] },
+                    hi: { q: "प्रत्यास्थता सीमा (elastic limit) के भीतर प्रतिबल (stress) और विकृति (strain) के अनुपात को क्या कहा जाता है?", options: ["पॉइसन का अनुपात", "बल्क मापांक", "यंग का मापांक", "शीयर मापांक"] },
+                    correct: 2
+                }
+            ];
+
+            // ================== STATE MANAGEMENT ==================
+            
+            let state = {
+                sem: "",
+                branch: "",
+                lang: 'en', // 'en' or 'hi'
+                currentQ: 0,
+                answers: new Array(10).fill(null),
+                timeLeft: 30,
+                timerInterval: null,
+                isTyping: false,
+                typingTimeouts: [],
+                optionTimeouts: []
+            };
+
+            // ================== DOM ELEMENTS ==================
+            
+            const views = {
+                sem: document.getElementById('view-semester'),
+                branch: document.getElementById('view-branch'),
+                quiz: document.getElementById('view-quiz'),
+                result: document.getElementById('view-result')
+            };
+            const loadingScreen = document.getElementById('loading-screen');
+            
+            // UI elements
+            const semGrid = document.getElementById('semester-grid');
+            const branchGrid = document.getElementById('branch-grid');
+            
+            // Quiz Elements
+            const qText = document.getElementById('question-text');
+            const optContainer = document.getElementById('options-container');
+            const btnNext = document.getElementById('btn-next');
+            const btnPrev = document.getElementById('btn-prev');
+            const timerText = document.getElementById('timer-text');
+            const timerRing = document.getElementById('timer-ring');
+            const progressBar = document.getElementById('progress-bar');
+            const currentQNum = document.getElementById('current-q-num');
+            
+            // Lang Toggle
+            const langToggle = document.getElementById('lang-toggle');
+            const langKnob = document.getElementById('lang-knob');
+            const langEn = document.getElementById('lang-en');
+            const langHi = document.getElementById('lang-hi');
+
+            // ================== INITIALIZATION ==================
+            
+            function init() {
+                renderSemesters();
+                renderBranches();
+                bindGlobalEvents();
+            }
+
+            function renderSemesters() {
+                semGrid.innerHTML = '';
+                semesters.forEach(s => {
+                    const card = document.createElement('div');
+                    card.className = "card-container";
+                    card.innerHTML = `
+                        <div class="card-3d h-full p-8 flex flex-col items-center text-center group" style="box-shadow: inset 0 0 0 1px ${s.border}">
+                            <div class="icon-wrapper w-16 h-16 rounded-full bg-gradient-to-br ${s.color} flex items-center justify-center border border-white/10 mb-5">
+                                <i class="fa-solid ${s.icon} text-3xl text-white"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3 class="text-xl font-bold text-white">${s.name}</h3>
+                            </div>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => {
+                        state.sem = s.name;
+                        document.getElementById('lbl-sem').textContent = s.name;
+                        switchView(views.branch);
+                    });
+                    semGrid.appendChild(card);
+                });
+            }
+
+            function renderBranches() {
+                branchGrid.innerHTML = '';
+                branches.forEach((b, i) => {
+                    const card = document.createElement('div');
+                    card.className = "card-container";
+                    card.style.animationDelay = `${i * 0.05}s`;
+                    card.innerHTML = `
+                        <div class="card-3d h-full p-6 flex flex-col items-center text-center group">
+                            <div class="icon-wrapper w-14 h-14 rounded-full bg-white/5 flex items-center justify-center border border-white/10 mb-4 group-hover:bg-white/10 transition-colors">
+                                <i class="fa-solid ${b.icon} text-2xl ${b.color}"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3 class="text-base font-bold text-gray-200">${b.name}</h3>
+                            </div>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => {
+                        state.branch = b.name;
+                        document.getElementById('quiz-sem-lbl').textContent = state.sem;
+                        document.getElementById('quiz-branch-lbl').textContent = state.branch;
+                        startQuizProcess();
+                    });
+                    branchGrid.appendChild(card);
+                });
+            }
+
+            function bindGlobalEvents() {
+                document.querySelectorAll('.btn-back-sem').forEach(btn => {
+                    btn.addEventListener('click', () => switchView(views.sem));
+                });
+                
+                document.querySelectorAll('.btn-exit-quiz').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        // Reset everything and go to sem view
+                        stopTimer();
+                        clearAllAnimations();
+                        state = { ...state, currentQ: 0, answers: new Array(10).fill(null) };
+                        switchView(views.sem);
+                    });
+                });
+
+                document.getElementById('btn-restart').addEventListener('click', () => {
+                    state.currentQ = 0;
+                    state.answers = new Array(10).fill(null);
+                    startQuizProcess();
+                });
+
+                // Language Toggle Logic
+                langToggle.addEventListener('click', () => {
+                    state.lang = state.lang === 'en' ? 'hi' : 'en';
+                    updateLangUI();
+                    
+                    // If in quiz, re-render current question instantly (skip typing to save time)
+                    if(views.quiz.classList.contains('active')) {
+                        clearAllAnimations();
+                        renderQuestion(true); 
+                    }
+                });
+
+                btnNext.addEventListener('click', handleNext);
+                btnPrev.addEventListener('click', handlePrev);
+            }
+
+            function updateLangUI() {
+                if(state.lang === 'hi') {
+                    langKnob.style.transform = 'translateX(24px)';
+                    langToggle.classList.remove('bg-brand-primary');
+                    langToggle.classList.add('bg-brand-accent');
+                    langEn.classList.remove('text-white');
+                    langEn.classList.add('text-gray-400');
+                    langHi.classList.remove('text-gray-400');
+                    langHi.classList.add('text-white');
+                } else {
+                    langKnob.style.transform = 'translateX(0)';
+                    langToggle.classList.add('bg-brand-primary');
+                    langToggle.classList.remove('bg-brand-accent');
+                    langHi.classList.remove('text-white');
+                    langHi.classList.add('text-gray-400');
+                    langEn.classList.remove('text-gray-400');
+                    langEn.classList.add('text-white');
+                }
+            }
+
+            // ================== QUIZ CORE ENGINE ==================
+
+            function switchView(target) {
+                Object.values(views).forEach(v => {
+                    v.classList.remove('active');
+                    setTimeout(() => v.style.display = 'none', 400);
+                });
+                setTimeout(() => {
+                    target.style.display = 'block';
+                    void target.offsetWidth;
+                    target.classList.add('active');
+                    window.scrollTo({top:0, behavior:'smooth'});
+                }, 410);
+            }
+
+            function triggerLoader(cb) {
+                Object.values(views).forEach(v => v.classList.remove('active'));
+                loadingScreen.style.pointerEvents = 'all';
+                loadingScreen.classList.remove('opacity-0');
+                loadingScreen.classList.add('opacity-100');
+                
+                setTimeout(() => {
+                    loadingScreen.classList.remove('opacity-100');
+                    loadingScreen.classList.add('opacity-0');
+                    loadingScreen.style.pointerEvents = 'none';
+                    cb();
+                }, 2000);
+            }
+
+            function startQuizProcess() {
+                triggerLoader(() => {
+                    switchView(views.quiz);
+                    loadQuestion(0);
+                });
+            }
+
+            function clearAllAnimations() {
+                state.isTyping = false;
+                state.typingTimeouts.forEach(clearTimeout);
+                state.optionTimeouts.forEach(clearTimeout);
+                state.typingTimeouts = [];
+                state.optionTimeouts = [];
+                qText.classList.remove('cursor');
+            }
+
+            function loadQuestion(index) {
+                clearAllAnimations();
+                stopTimer();
+                
+                state.currentQ = index;
+                currentQNum.textContent = index + 1;
+                progressBar.style.width = `${((index) / 10) * 100}%`;
+                
+                btnPrev.disabled = index === 0;
+                btnNext.innerHTML = index === 9 ? 'Submit Quiz <i class="fa-solid fa-check ml-2"></i>' : 'Next <i class="fa-solid fa-angle-right ml-2"></i>';
+                if(index === 9) btnNext.classList.replace('bg-brand-primary', 'bg-brand-secondary');
+                else btnNext.classList.replace('bg-brand-secondary', 'bg-brand-primary');
+
+                optContainer.innerHTML = '';
+                qText.textContent = '';
+                qText.classList.add('cursor');
+
+                startTimer();
+                renderQuestion(false); // false = animate typing
+            }
+
+            function renderQuestion(instant) {
+                const data = quizData[state.currentQ][state.lang];
+                const textToType = data.q;
+                
+                if (instant) {
+                    qText.textContent = textToType;
+                    qText.classList.remove('cursor');
+                    renderOptions(data.options, true);
+                    return;
+                }
+
+                // Typing Animation
+                state.isTyping = true;
+                let i = 0;
+                function typeChar() {
+                    if (i < textToType.length) {
+                        qText.textContent += textToType.charAt(i);
+                        i++;
+                        state.typingTimeouts.push(setTimeout(typeChar, 20)); // typing speed
+                    } else {
+                        state.isTyping = false;
+                        qText.classList.remove('cursor');
+                        renderOptions(data.options, false);
+                    }
+                }
+                typeChar();
+            }
+
+            function renderOptions(optionsList, instant) {
+                optContainer.innerHTML = '';
+                const labels = ['A', 'B', 'C', 'D'];
+                
+                optionsList.forEach((optText, i) => {
+                    const btn = document.createElement('button');
+                    // Font class logic for Hindi options
+                    const fontClass = state.lang === 'hi' ? 'font-hindi text-[15px]' : 'font-sans text-sm';
+                    
+                    btn.className = `option-btn w-full text-left p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 flex items-center gap-4 group ${instant ? 'visible' : ''}`;
+                    btn.innerHTML = `
+                        <div class="w-8 h-8 rounded-lg bg-black/30 flex items-center justify-center font-bold text-gray-400 group-hover:text-white transition-colors border border-white/5 shrink-0">
+                            ${labels[i]}
+                        </div>
+                        <span class="text-gray-200 ${fontClass}">${optText}</span>
+                    `;
+
+                    // If previously answered
+                    if(state.answers[state.currentQ] === i) {
+                        btn.classList.add('selected');
+                        btn.querySelector('div').classList.replace('bg-black/30', 'bg-brand-primary');
+                        btn.querySelector('div').classList.replace('text-gray-400', 'text-white');
+                    }
+
+                    btn.addEventListener('click', () => selectOption(i, btn));
+                    optContainer.appendChild(btn);
+
+                    if(!instant) {
+                        state.optionTimeouts.push(setTimeout(() => {
+                            btn.classList.add('visible');
+                        }, i * 150)); // Sequential fade in
+                    }
+                });
+            }
+
+            function selectOption(selectedIndex, btnElement) {
+                // If clicked while typing, instantly show everything first
+                if (state.isTyping) {
+                    clearAllAnimations();
+                    renderQuestion(true);
+                    // re-select from newly rendered
+                    const newBtns = optContainer.querySelectorAll('.option-btn');
+                    selectDOMOption(selectedIndex, newBtns[selectedIndex]);
+                    return;
+                }
+                selectDOMOption(selectedIndex, btnElement);
+            }
+
+            function selectDOMOption(idx, el) {
+                state.answers[state.currentQ] = idx;
+                
+                // Clear sibling styles
+                const allOpts = optContainer.querySelectorAll('.option-btn');
+                allOpts.forEach(b => {
+                    b.classList.remove('selected');
+                    const labelDiv = b.querySelector('div');
+                    labelDiv.classList.replace('bg-brand-primary', 'bg-black/30');
+                    labelDiv.classList.replace('text-white', 'text-gray-400');
+                });
+
+                // Apply selected styles
+                el.classList.add('selected');
+                const selectedLabel = el.querySelector('div');
+                selectedLabel.classList.replace('bg-black/30', 'bg-brand-primary');
+                selectedLabel.classList.replace('text-gray-400', 'text-white');
+            }
+
+            // ================== TIMER LOGIC ==================
+
+            function startTimer() {
+                state.timeLeft = 30;
+                timerText.textContent = state.timeLeft;
+                timerRing.style.strokeDashoffset = '0';
+                timerRing.style.stroke = '#06b6d4'; // Reset to cyan
+                
+                state.timerInterval = setInterval(() => {
+                    state.timeLeft--;
+                    timerText.textContent = state.timeLeft;
+                    
+                    // Update Circle Offset (283 is total dasharray)
+                    const offset = 283 - (state.timeLeft / 30) * 283;
+                    timerRing.style.strokeDashoffset = offset;
+
+                    // Color change warning
+                    if(state.timeLeft <= 10) timerRing.style.stroke = '#ef4444'; // Red
+                    else if(state.timeLeft <= 20) timerRing.style.stroke = '#eab308'; // Yellow
+
+                    if (state.timeLeft <= 0) {
+                        stopTimer();
+                        handleNext(); // Auto skip on timeout
+                    }
+                }, 1000);
+            }
+
+            function stopTimer() {
+                if(state.timerInterval) clearInterval(state.timerInterval);
+            }
+
+            // ================== NAVIGATION LOGIC ==================
+
+            function handleNext() {
+                // If typing, clicking next instantly shows everything
+                if (state.isTyping) {
+                    clearAllAnimations();
+                    renderQuestion(true);
+                    return;
+                }
+
+                if (state.currentQ < 9) {
+                    loadQuestion(state.currentQ + 1);
+                } else {
+                    submitQuiz();
+                }
+            }
+
+            function handlePrev() {
+                if (state.isTyping) {
+                    clearAllAnimations();
+                }
+                if (state.currentQ > 0) {
+                    loadQuestion(state.currentQ - 1);
+                }
+            }
+
+            // ================== RESULT PROCESSING ==================
+
+            function submitQuiz() {
+                stopTimer();
+                clearAllAnimations();
+                progressBar.style.width = '100%';
+                
+                triggerLoader(() => {
+                    calculateResults();
+                    switchView(views.result);
+                });
+            }
+
+            function calculateResults() {
+                let correct = 0;
+                let attempted = 0;
+
+                state.answers.forEach((ans, i) => {
+                    if (ans !== null) {
+                        attempted++;
+                        if (ans === quizData[i].correct) correct++;
+                    }
+                });
+
+                const wrong = attempted - correct;
+                const percentage = Math.round((correct / 10) * 100);
+
+                // Populate UI
+                document.getElementById('res-attempted').textContent = attempted;
+                document.getElementById('res-correct').textContent = correct;
+                document.getElementById('res-wrong').textContent = wrong;
+                document.getElementById('final-percent').textContent = percentage + '%';
+
+                // Animate Result Ring (440 is total dash)
+                const resOffset = 440 - (percentage / 100) * 440;
+                setTimeout(() => {
+                    document.getElementById('result-ring').style.strokeDashoffset = resOffset;
+                }, 500);
+
+                // Performance Analysis
+                const banner = document.getElementById('performance-banner');
+                const msg = document.getElementById('motivational-msg');
+
+                banner.className = 'inline-block px-6 py-3 rounded-full text-lg font-bold border mb-8'; // Reset
+                
+                if(percentage >= 80) {
+                    banner.classList.add('bg-emerald-500/20', 'border-emerald-500', 'text-emerald-400');
+                    banner.innerHTML = '<i class="fa-solid fa-trophy mr-2"></i> Excellent Performance';
+                    msg.textContent = "Outstanding work! Your technical concepts are incredibly strong.";
+                    document.getElementById('result-ring').style.stroke = '#10b981'; // Emerald
+                } else if(percentage >= 60) {
+                    banner.classList.add('bg-blue-500/20', 'border-blue-500', 'text-blue-400');
+                    banner.innerHTML = '<i class="fa-solid fa-star mr-2"></i> Very Good Performance';
+                    msg.textContent = "Great job! You have a solid grasp of the subjects. Keep polishing.";
+                    document.getElementById('result-ring').style.stroke = '#3b82f6'; // Blue
+                } else if(percentage >= 40) {
+                    banner.classList.add('bg-yellow-500/20', 'border-yellow-500', 'text-yellow-400');
+                    banner.innerHTML = '<i class="fa-solid fa-thumbs-up mr-2"></i> Good Performance';
+                    msg.textContent = "Not bad, but there's room for improvement. Review your notes!";
+                    document.getElementById('result-ring').style.stroke = '#eab308'; // Yellow
+                } else {
+                    banner.classList.add('bg-red-500/20', 'border-red-500', 'text-red-400');
+                    banner.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i> Needs Improvement';
+                    msg.textContent = "Don't be discouraged! Engineering takes practice. Read the notes and try again.";
+                    document.getElementById('result-ring').style.stroke = '#ef4444'; // Red
+                }
+            }
+
+            // Start system
+            init();
+        });
+    </script>
+</body>
+</html>

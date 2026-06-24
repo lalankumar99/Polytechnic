@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polytechnic Hub | Semester Wise Notes</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            bg: '#050b14',
+                            primary: '#3b82f6',
+                            secondary: '#8b5cf6',
+                            glass: 'rgba(255, 255, 255, 0.03)',
+                            glassBorder: 'rgba(255, 255, 255, 0.08)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS for Premium 3D & Animations -->
+    <style>
+        body {
+            background-color: #050b14;
+            color: #ffffff;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 25%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        /* View Management */
+        .view-section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .view-section.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ---------------- Premium Loading Animation ---------------- */
+        #loading-screen {
+            background: rgba(5, 11, 20, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 9999;
+        }
+
+        .loader-ring {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top: 4px solid #3b82f6;
+            border-right: 4px solid #8b5cf6;
+            border-bottom: 4px solid #06b6d4;
+            animation: spin 1.5s linear infinite;
+            position: relative;
+        }
+
+        .loader-ring::before {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top: 4px solid #06b6d4;
+            border-left: 4px solid #3b82f6;
+            animation: spin-reverse 2s linear infinite;
+        }
+
+        .loader-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: white;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin-reverse { 0% { transform: rotate(360deg); } 100% { transform: rotate(0deg); } }
+        @keyframes pulse-glow {
+            0%, 100% { text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); transform: translate(-50%, -50%) scale(1); }
+            50% { text-shadow: 0 0 20px rgba(139, 92, 246, 0.8); transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        /* ---------------- 3D Premium Cards & Glassmorphism ---------------- */
+        .card-container {
+            perspective: 1200px;
+        }
+
+        .card-3d {
+            transform-style: preserve-3d;
+            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 24px;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+
+        .card-3d::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.06), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 1;
+        }
+
+        .card-3d:hover {
+            transform: translateY(-12px) rotateX(6deg) rotateY(-4deg);
+            box-shadow: 
+                20px 20px 40px -10px rgba(0,0,0,0.5),
+                inset 0 1px 1px rgba(255,255,255,0.2),
+                0 0 20px rgba(59, 130, 246, 0.2);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .card-3d:hover::before {
+            opacity: 1;
+        }
+
+        .card-content {
+            transform: translateZ(60px);
+            position: relative;
+            z-index: 2;
+        }
+
+        .icon-wrapper {
+            transform: translateZ(80px);
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .card-3d:hover .icon-wrapper {
+            transform: translateZ(100px) scale(1.1);
+        }
+
+        /* Floating Animation */
+        @keyframes float-card {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .animate-float-1 { animation: float-card 6s ease-in-out infinite; }
+        .animate-float-2 { animation: float-card 7s ease-in-out infinite 1s; }
+        .animate-float-3 { animation: float-card 6.5s ease-in-out infinite 2s; }
+        .animate-float-4 { animation: float-card 8s ease-in-out infinite 0.5s; }
+        .animate-float-5 { animation: float-card 7.5s ease-in-out infinite 1.5s; }
+        .animate-float-6 { animation: float-card 6s ease-in-out infinite 2.5s; }
+
+        /* Specific Gradient Borders for Cards */
+        .border-glow-blue { box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2); }
+        .border-glow-green { box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.2); }
+        .border-glow-orange { box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.2); }
+        .border-glow-red { box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.2); }
+        .border-glow-yellow { box-shadow: inset 0 0 0 1px rgba(234, 179, 8, 0.2); }
+        .border-glow-purple { box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.2); }
+
+        /* Background Animated Blobs */
+        .bg-blob {
+            position: absolute;
+            filter: blur(100px);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.4;
+            animation: blob-float 20s infinite alternate;
+        }
+        
+        @keyframes blob-float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 50px) scale(1.2); }
+        }
+
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-primary selection:text-white">
+
+    <!-- Background Decoration -->
+    <div class="bg-blob bg-blue-600/30 w-[500px] h-[500px] top-[-100px] left-[-100px]"></div>
+    <div class="bg-blob bg-purple-600/30 w-[400px] h-[400px] bottom-[-50px] right-[-50px]" style="animation-delay: -5s;"></div>
+
+    <!-- Navigation Bar (Simulated) -->
+    <header class="fixed w-full top-0 z-40 bg-brand-bg/80 backdrop-blur-lg border-b border-white/10 transition-all duration-300">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-graduation-cap text-white text-xl"></i>
+                </div>
+                <h1 class="text-xl font-heading font-bold tracking-wide text-white">POLYTECHNIC <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">HUB</span></h1>
+            </div>
+            <nav class="hidden md:flex gap-6 items-center">
+                <a href="#" class="text-sm font-medium text-gray-400 hover:text-white transition-colors">Home</a>
+                <button id="triggerNotesFlow" class="text-sm font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 hover:scale-105 transition-transform flex items-center gap-2">
+                    <i class="fa-solid fa-book-open text-blue-400"></i> Semester Wise Notes
+                </button>
+                <a href="#" class="text-sm font-medium text-gray-400 hover:text-white transition-colors">PYQ Hub</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="pt-28 pb-20 min-h-screen relative">
+
+        <!-- Initial Welcome View (To trigger the flow manually if not using header) -->
+        <section id="welcome-view" class="view-section active flex flex-col items-center justify-center min-h-[70vh] text-center px-6">
+            <div class="max-w-2xl mx-auto">
+                <h2 class="text-4xl md:text-5xl font-heading font-bold mb-6">Welcome to <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Polytechnic Hub</span></h2>
+                <p class="text-gray-400 mb-10 text-lg">Click the button below to explore our highly organized, premium semester-wise note collection.</p>
+                <button id="startJourneyBtn" class="group relative px-8 py-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all duration-300 overflow-hidden shadow-[0_0_20px_rgba(59,130,246,0.1)] hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] hover:-translate-y-1">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <span class="relative z-10 font-semibold text-lg flex items-center gap-3">
+                        <i class="fa-solid fa-layer-group text-blue-400"></i>
+                        Open Semester Wise Notes
+                    </span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Loading Screen Overlay -->
+        <div id="loading-screen" class="fixed inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500">
+            <div class="loader-ring mb-8">
+                <i class="fa-solid fa-book-atlas loader-icon"></i>
+            </div>
+            <h3 class="text-2xl font-heading font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 mb-2">Fetching Resources</h3>
+            <p class="text-gray-400 text-sm animate-pulse">Preparing your premium learning experience...</p>
+        </div>
+
+        <!-- Semester Selection View -->
+        <section id="semester-view" class="view-section container mx-auto px-6">
+            <div class="text-center mb-14">
+                <div class="inline-block px-4 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 text-sm font-medium mb-4 backdrop-blur-md">
+                    Step 1 of 2
+                </div>
+                <h2 class="text-4xl md:text-5xl font-heading font-bold mb-4">Select Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Semester</span></h2>
+                <p class="text-gray-400 max-w-xl mx-auto">Choose your current semester to access perfectly structured notes and study materials.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                
+                <!-- 1st Sem -->
+                <div class="card-container semester-card animate-float-1" data-semester="First Semester">
+                    <div class="card-3d h-full p-8 border-glow-blue flex flex-col items-center text-center group">
+                        <div class="icon-wrapper w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/10 flex items-center justify-center border border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.15)] mb-6">
+                            <i class="fa-solid fa-1 text-4xl text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-2xl font-bold mb-2">First Semester</h3>
+                            <p class="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">Foundation subjects & common engineering papers.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2nd Sem -->
+                <div class="card-container semester-card animate-float-2" data-semester="Second Semester">
+                    <div class="card-3d h-full p-8 border-glow-green flex flex-col items-center text-center group">
+                        <div class="icon-wrapper w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-green-500/10 flex items-center justify-center border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.15)] mb-6">
+                            <i class="fa-solid fa-2 text-4xl text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-2xl font-bold mb-2">Second Semester</h3>
+                            <p class="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">Advanced foundation & introductory core topics.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3rd Sem -->
+                <div class="card-container semester-card animate-float-3" data-semester="Third Semester">
+                    <div class="card-3d h-full p-8 border-glow-orange flex flex-col items-center text-center group">
+                        <div class="icon-wrapper w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500/20 to-yellow-500/10 flex items-center justify-center border border-orange-500/20 shadow-[0_0_20px_rgba(249,115,22,0.15)] mb-6">
+                            <i class="fa-solid fa-3 text-4xl text-orange-400 drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-2xl font-bold mb-2">Third Semester</h3>
+                            <p class="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">Beginning of branch-specific core engineering subjects.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4th Sem -->
+                <div class="card-container semester-card animate-float-4" data-semester="Fourth Semester">
+                    <div class="card-3d h-full p-8 border-glow-red flex flex-col items-center text-center group">
+                        <div class="icon-wrapper w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-rose-500/10 flex items-center justify-center border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.15)] mb-6">
+                            <i class="fa-solid fa-4 text-4xl text-red-400 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-2xl font-bold mb-2">Fourth Semester</h3>
+                            <p class="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">Deep dive into major technical and practical concepts.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5th Sem -->
+                <div class="card-container semester-card animate-float-5" data-semester="Fifth Semester">
+                    <div class="card-3d h-full p-8 border-glow-yellow flex flex-col items-center text-center group">
+                        <div class="icon-wrapper w-20 h-20 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-amber-500/10 flex items-center justify-center border border-yellow-500/20 shadow-[0_0_20px_rgba(234,179,8,0.15)] mb-6">
+                            <i class="fa-solid fa-5 text-4xl text-yellow-400 drop-shadow-[0_0_10px_rgba(234,179,8,0.5)]"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-2xl font-bold mb-2">Fifth Semester</h3>
+                            <p class="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">Advanced electives and pre-final year project planning.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6th Sem -->
+                <div class="card-container semester-card animate-float-6" data-semester="Sixth Semester">
+                    <div class="card-3d h-full p-8 border-glow-purple flex flex-col items-center text-center group">
+                        <div class="icon-wrapper w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500/20 to-fuchsia-500/10 flex items-center justify-center border border-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.15)] mb-6">
+                            <i class="fa-solid fa-6 text-4xl text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-2xl font-bold mb-2">Sixth Semester</h3>
+                            <p class="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">Final year projects, internships, and core completion.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Branch Selection View -->
+        <section id="branch-view" class="view-section container mx-auto px-6">
+            
+            <!-- Top Action Bar -->
+            <div class="max-w-6xl mx-auto mb-10 flex items-center justify-between">
+                <button id="backBtn" class="flex items-center gap-2 text-gray-400 hover:text-white px-4 py-2 rounded-xl hover:bg-white/5 transition-all group">
+                    <i class="fa-solid fa-arrow-left-long group-hover:-translate-x-1 transition-transform"></i>
+                    <span class="font-medium">Back to Semesters</span>
+                </button>
+                <div class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-300 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-folder-open text-blue-400"></i>
+                    <span id="selected-semester-label" class="font-semibold text-white">Selected Sem</span>
+                </div>
+            </div>
+
+            <div class="text-center mb-14">
+                <div class="inline-block px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-400 text-sm font-medium mb-4 backdrop-blur-md">
+                    Step 2 of 2
+                </div>
+                <h2 class="text-4xl md:text-5xl font-heading font-bold mb-4">Select Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Branch</span></h2>
+                <p class="text-gray-400 max-w-xl mx-auto">Choose your engineering discipline. <br><span class="text-xs text-brand-primary opacity-70">(Placeholder interface - No subject pages will open)</span></p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                
+                <!-- Electrical -->
+                <div class="card-container branch-card">
+                    <div class="card-3d h-full p-8 flex flex-col items-center text-center group" style="box-shadow: inset 0 0 0 1px rgba(250, 204, 21, 0.2);">
+                        <div class="icon-wrapper w-20 h-20 rounded-full bg-gradient-to-br from-yellow-500/20 to-yellow-600/5 flex items-center justify-center border border-yellow-500/20 mb-6 group-hover:scale-110 transition-transform duration-500">
+                            <i class="fa-solid fa-bolt text-4xl text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-xl font-bold mb-2">Electrical Engineering</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Computer Science -->
+                <div class="card-container branch-card">
+                    <div class="card-3d h-full p-8 flex flex-col items-center text-center group" style="box-shadow: inset 0 0 0 1px rgba(6, 182, 212, 0.2);">
+                        <div class="icon-wrapper w-20 h-20 rounded-full bg-gradient-to-br from-cyan-500/20 to-cyan-600/5 flex items-center justify-center border border-cyan-500/20 mb-6 group-hover:scale-110 transition-transform duration-500">
+                            <i class="fa-solid fa-laptop-code text-4xl text-cyan-400 drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-xl font-bold mb-2">Computer Science</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mechanical -->
+                <div class="card-container branch-card">
+                    <div class="card-3d h-full p-8 flex flex-col items-center text-center group" style="box-shadow: inset 0 0 0 1px rgba(156, 163, 175, 0.3);">
+                        <div class="icon-wrapper w-20 h-20 rounded-full bg-gradient-to-br from-gray-500/20 to-gray-600/5 flex items-center justify-center border border-gray-500/20 mb-6 group-hover:scale-110 transition-transform duration-500">
+                            <i class="fa-solid fa-gear text-4xl text-gray-400 drop-shadow-[0_0_10px_rgba(156,163,175,0.5)] group-hover:rotate-180 transition-transform duration-1000"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-xl font-bold mb-2">Mechanical Engineering</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Civil -->
+                <div class="card-container branch-card">
+                    <div class="card-3d h-full p-8 flex flex-col items-center text-center group" style="box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.2);">
+                        <div class="icon-wrapper w-20 h-20 rounded-full bg-gradient-to-br from-orange-500/20 to-orange-600/5 flex items-center justify-center border border-orange-500/20 mb-6 group-hover:scale-110 transition-transform duration-500">
+                            <i class="fa-solid fa-building text-4xl text-orange-400 drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-xl font-bold mb-2">Civil Engineering</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Electronics -->
+                <div class="card-container branch-card">
+                    <div class="card-3d h-full p-8 flex flex-col items-center text-center group" style="box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.2);">
+                        <div class="icon-wrapper w-20 h-20 rounded-full bg-gradient-to-br from-purple-500/20 to-purple-600/5 flex items-center justify-center border border-purple-500/20 mb-6 group-hover:scale-110 transition-transform duration-500">
+                            <i class="fa-solid fa-microchip text-4xl text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-xl font-bold mb-2">Electronics Engineering</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Automobile -->
+                <div class="card-container branch-card">
+                    <div class="card-3d h-full p-8 flex flex-col items-center text-center group" style="box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);">
+                        <div class="icon-wrapper w-20 h-20 rounded-full bg-gradient-to-br from-blue-500/20 to-blue-600/5 flex items-center justify-center border border-blue-500/20 mb-6 group-hover:scale-110 transition-transform duration-500">
+                            <i class="fa-solid fa-car-side text-4xl text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-xl font-bold mb-2">Automobile Engineering</h3>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // DOM Elements
+            const welcomeView = document.getElementById('welcome-view');
+            const semesterView = document.getElementById('semester-view');
+            const branchView = document.getElementById('branch-view');
+            const loadingScreen = document.getElementById('loading-screen');
+            
+            const startBtns = [document.getElementById('startJourneyBtn'), document.getElementById('triggerNotesFlow')];
+            const backBtn = document.getElementById('backBtn');
+            const semesterCards = document.querySelectorAll('.semester-card');
+            const branchCards = document.querySelectorAll('.branch-card');
+            const selectedSemesterLabel = document.getElementById('selected-semester-label');
+
+            // Utility to switch views
+            function showView(viewElement) {
+                // Hide all views
+                [welcomeView, semesterView, branchView].forEach(view => {
+                    view.classList.remove('active');
+                    setTimeout(() => view.style.display = 'none', 300); // Wait for fade out
+                });
+
+                // Show targeted view
+                setTimeout(() => {
+                    viewElement.style.display = 'block';
+                    // Trigger reflow
+                    void viewElement.offsetWidth;
+                    viewElement.classList.add('active');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 310);
+            }
+
+            // Step 1: Start Flow & Show Loader
+            startBtns.forEach(btn => {
+                if(btn) {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        
+                        // Show Loader
+                        loadingScreen.style.pointerEvents = 'all';
+                        loadingScreen.classList.remove('opacity-0');
+                        loadingScreen.classList.add('opacity-100');
+
+                        // Hide current view immediately
+                        welcomeView.classList.remove('active');
+
+                        // Wait 2.5 seconds (Premium loading feel)
+                        setTimeout(() => {
+                            // Hide Loader
+                            loadingScreen.classList.remove('opacity-100');
+                            loadingScreen.classList.add('opacity-0');
+                            loadingScreen.style.pointerEvents = 'none';
+                            
+                            // Show Semester View
+                            showView(semesterView);
+                        }, 2500);
+                    });
+                }
+            });
+
+            // Step 2: Semester Card Click Logic
+            semesterCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    // Update the label in the branch view
+                    const semName = card.getAttribute('data-semester');
+                    selectedSemesterLabel.textContent = semName;
+
+                    // Transition to Branch View
+                    showView(branchView);
+                });
+            });
+
+            // Step 3: Branch Card Click Logic (STOP HERE logic)
+            branchCards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    // Prevent any default action.
+                    e.preventDefault();
+                    
+                    // Optional visual feedback to show it's a placeholder
+                    const originalTransform = card.querySelector('.card-3d').style.transform;
+                    card.querySelector('.card-3d').style.transform = 'scale(0.98)';
+                    
+                    setTimeout(() => {
+                        card.querySelector('.card-3d').style.transform = originalTransform;
+                    }, 150);
+
+                    // Console log for developer awareness (No actions taken as per strict instruction)
+                    console.log('Branch selected. Flow stopped as per instructions. No pages/downloads will be triggered.');
+                });
+            });
+
+            // Back Button Logic
+            backBtn.addEventListener('click', () => {
+                showView(semesterView);
+            });
+
+            // Mouse Move Effect for 3D Cards (Dynamic lighting)
+            document.querySelectorAll('.card-3d').forEach(card => {
+                card.addEventListener('mousemove', e => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

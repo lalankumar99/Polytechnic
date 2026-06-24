@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Founder | POLYTECHNIC HUB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #020617; color: #e2e8f0; font-family: 'Poppins', sans-serif; }
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+        .notebook-page { background: #f8fafc; color: #1e293b; border-left: 4px solid #3b82f6; }
+        .card-hover:hover { transform: translateY(-10px); border-color: #3b82f6; }
+    </style>
+</head>
+<body>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center pt-20 px-6 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20"></div>
+        <div class="text-center z-10 max-w-4xl">
+            <div class="w-40 h-40 mx-auto rounded-full border-4 border-blue-500/30 mb-8 overflow-hidden bg-slate-800">
+                <div class="w-full h-full bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-user text-6xl text-slate-500"></i></div>
+            </div>
+            <h1 class="text-6xl font-extrabold font-heading mb-4 text-white">Lalan Kumar</h1>
+            <p class="text-2xl text-blue-400 font-semibold mb-6">Founder & Creator of POLYTECHNIC HUB</p>
+            <blockquote class="text-xl italic text-slate-400 mb-10">"Empowering the next generation of engineers through accessible, quality education."</blockquote>
+            <a href="#about" class="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-full font-bold transition">Discover My Journey</a>
+        </div>
+    </section>
+
+    <!-- About & Story Section -->
+    <section id="about" class="py-20 px-6">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl font-bold font-heading mb-16 text-center text-white">The Founder's Story</h2>
+            <div class="notebook-page p-10 rounded-r-3xl shadow-2xl">
+                <h3 class="text-2xl font-bold mb-6">From Student to Creator</h3>
+                <p class="mb-4">As an Electrical Engineering student, I recognized the gap between curriculum and industry-ready skills. POLYTECHNIC HUB was born from a vision to simplify complex engineering concepts for my peers.</p>
+                <p>Through LK SMART STUDY, I aim to bridge this gap, fostering a community where knowledge is shared, curiosity is encouraged, and every student feels supported in their diploma journey.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Achievement & Skills -->
+    <section class="py-20 px-6 bg-slate-900/50">
+        <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-16">
+            <div>
+                <h3 class="text-3xl font-bold mb-10">Achievements</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass p-6 rounded-2xl card-hover transition">
+                        <i class="fa-solid fa-graduation-cap text-blue-400 text-2xl mb-4"></i>
+                        <h4 class="font-bold">Diploma Engineer</h4>
+                    </div>
+                    <div class="glass p-6 rounded-2xl card-hover transition">
+                        <i class="fa-solid fa-pen-nib text-purple-400 text-2xl mb-4"></i>
+                        <h4 class="font-bold">Content Creator</h4>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-3xl font-bold mb-10">Core Skills</h3>
+                <div class="flex flex-wrap gap-4">
+                    <span class="px-4 py-2 bg-blue-600/20 text-blue-400 rounded-full">Electrical Engineering</span>
+                    <span class="px-4 py-2 bg-blue-600/20 text-blue-400 rounded-full">Web Development</span>
+                    <span class="px-4 py-2 bg-blue-600/20 text-blue-400 rounded-full">AI Learning</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-20 px-6 max-w-4xl mx-auto">
+        <h3 class="text-3xl font-bold mb-12 text-center">Get In Touch</h3>
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+            <div class="glass p-8 rounded-3xl text-center">
+                <i class="fa-brands fa-whatsapp text-green-400 text-3xl mb-4"></i>
+                <h4 class="font-bold mb-2">WhatsApp Only</h4>
+                <p class="text-lg font-mono">+91 9296783086</p>
+                <small class="text-slate-500 italic">Please send a message first!</small>
+            </div>
+            <div class="glass p-8 rounded-3xl text-center">
+                <i class="fa-solid fa-envelope text-red-400 text-3xl mb-4"></i>
+                <h4 class="font-bold mb-2">Email</h4>
+                <p>lkstudiokatoriya@gmail.com</p>
+            </div>
+        </div>
+        
+        <!-- Form -->
+        <form class="glass p-8 rounded-3xl space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+                <input type="text" placeholder="Full Name" class="w-full p-4 bg-slate-800 rounded-xl focus:ring-2 ring-blue-500 outline-none">
+                <input type="email" placeholder="Email Address" class="w-full p-4 bg-slate-800 rounded-xl focus:ring-2 ring-blue-500 outline-none">
+            </div>
+            <textarea placeholder="Message" rows="5" class="w-full p-4 bg-slate-800 rounded-xl focus:ring-2 ring-blue-500 outline-none"></textarea>
+            <button type="submit" class="w-full py-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-700 transition">Send Message</button>
+        </form>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-10 text-center border-t border-slate-800 text-slate-500 text-sm">
+        <p>&copy; 2026 POLYTECHNIC HUB. All rights reserved.</p>
+        <p>Developed By: Lalan Kumar | LK SMART STUDY</p>
+    </footer>
+
+</body>
+</html>
