@@ -405,10 +405,12 @@
                             </div>
                         </div>
                     `;
-                    // The "STOP HERE" instruction
-                    card.addEventListener('click', showToast);
-                    syllabusGrid.appendChild(card);
-                });
+                    // Open Premium PDF Viewer
+card.addEventListener('click', () => {
+    window.location.href = "premium_pdf_viewer.html";
+});
+
+syllabusGrid.appendChild(card);
             }
 
             // --- LOGIC ---
